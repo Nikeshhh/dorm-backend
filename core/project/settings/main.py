@@ -143,3 +143,12 @@ CSRF_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_SAMESITE = 'Strict'
 CSRF_COOKIE_HTTPONLY = False  # False since we will grab it via universal-cookies
 SESSION_COOKIE_HTTPONLY = True
+
+
+# CORS settings
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+    ]
+CORS_ALLOW_CREDENTIALS = True
