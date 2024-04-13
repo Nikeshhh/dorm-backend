@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "distribution-service"
+version = "0.1.0"
+description = ""
+authors = ["Nikeshhh <WityazKajit@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^5.0.3"
+django-environ = "^0.11.2"
+djangorestframework = "^3.14.0"
+django-cors-headers = "^4.3.1"
+psycopg2 = "^2.9.9"
+pre-commit = "^3.6.2"
+ruff = "^0.3.1"
+pytest = "^8.0.2"
+pytest-django = "^4.8.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "core.project.settings"
