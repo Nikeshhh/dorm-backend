@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # First party apps
-    "core.apps.distribution.apps.DistributionConfig",
+    
     # Third party apps
     "rest_framework",
     "corsheaders",

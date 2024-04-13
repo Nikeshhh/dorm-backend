@@ -1,49 +1,25 @@
-# Template for Django REST Framework application
+# Dorm backend
 
-Repository for DRF template.
+Бэкэнд приложения системы для общежития.
 
-Contains all basic requirements to start application development.
+## Установка
 
-Contains ready-to-use docker infrastructure.
-
-Allows to run application either locally or inside container.
-
-## Installation
-
-Clone repository
+Клонировать репозиторий
 ```
 git clone ...
 ```
 
-Install pre-commit hooks into git
+Установить прекоммиты
 ```
 pre-commit install
 ```
 
-Run database inside container
+Запустить базу данных в контейнере
 ```
 docker compose -f .\docker-compose\storages.yaml --env-file .env  up --build -d
 ```
 
-Run application inside container
+Запустить приложение внутри контейнера
 ```
 docker compose -f .\docker-compose\app.yaml --env-file .env  up --build -d
 ```
-
-## Pre-installed django apps
-
-* corsheaders
-* rest_framework
-* django-environ
-* psycopg2
-
-## Pre-configured settings
-
-To run application with your custom settings, you should:
-
-* create `local.py` file, inside `settings` directory
-* import all variables from `main.py` settings
-* rewrite all necessary settings
-* replace `__init__.py` import, inside settings directory
-
-There are example `local_example.py` file, inside settings directory.
