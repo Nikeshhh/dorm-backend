@@ -1,7 +1,8 @@
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
+from rest_framework.status import HTTP_200_OK
+from rest_framework.exceptions import AuthenticationFailed
 
 from django.contrib.auth import login, authenticate
 
@@ -19,14 +20,17 @@ class AuthenticationViewSet(GenericViewSet):
         user = authenticate(username=username, password=password)
 
         if user is None:
-            return Response(
-                {'error': 'Неверные данные'},
-                HTTP_400_BAD_REQUEST
-            )
+            raise AuthenticationFailed()
         
         login(request, user)
 
         return Response(
             {'data': 'Успешная авторизация'},
             HTTP_200_OK
+        )
+    
+    @action(methods=('GET', ), detail=False)
+    def get_user(self, request, *args, **kwargs):
+        return Response(
+            {'user': str(request.user)}
         )
