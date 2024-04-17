@@ -7,6 +7,7 @@ class LaundrySerializer(ModelSerializer):
     class Meta:
         model = LaundryRecord
         fields = (
+            'pk',
             'record_date',
             'time_start',
             'time_end',

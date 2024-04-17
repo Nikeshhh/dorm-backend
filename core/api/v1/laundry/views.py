@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from rest_framework.authentication import SessionAuthentication
 from django.utils import timezone
 
 from core.api.v1.laundry.serializers import LaundrySerializer
@@ -13,6 +14,7 @@ from core.apps.laundry.models import LaundryRecord
 class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
     queryset = LaundryRecord.objects.all()
     serializer_class = LaundrySerializer
+    authentication_classes = (SessionAuthentication, )
     permission_classes = (IsAuthenticated, )
 
     def filter_queryset(self, queryset):
