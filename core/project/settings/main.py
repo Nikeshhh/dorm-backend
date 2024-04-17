@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # First party apps
-
+    'core.apps.laundry.apps.LaundryConfig',
     # Third party apps
     "rest_framework",
     "corsheaders",
@@ -141,7 +141,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CSRF_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_SAMESITE = 'Strict'
-CSRF_COOKIE_HTTPONLY = False  # False since we will grab it via universal-cookies
+CSRF_COOKIE_HTTPONLY = True  # False since we will grab it via universal-cookies
 SESSION_COOKIE_HTTPONLY = True
 
 
