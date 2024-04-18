@@ -17,10 +17,15 @@ def test_user():
 
 
 @pytest.fixture
-def user_client(client):
+def user_for_client():
     user = UserModel.objects.create(username='client_user')
     user.set_password('amogus')
     user.save()
+    return user
+
+@pytest.fixture
+def user_client(client, user_for_client):
+    
     
     new_client = client
     new_client.login(username='client_user', password='amogus')

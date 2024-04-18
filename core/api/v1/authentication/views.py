@@ -5,6 +5,7 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.exceptions import AuthenticationFailed
 
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import AnonymousUser
 
 from core.api.v1.authentication.serializers import LoginSerializer
 
@@ -30,7 +31,8 @@ class AuthenticationViewSet(GenericViewSet):
         )
     
     @action(methods=('GET', ), detail=False)
-    def get_user(self, request, *args, **kwargs):
+    def is_authenticated(self, request, *args, **kwargs):
         return Response(
-            {'user': str(request.user)}
+            {'is_authenticated': not isinstance(request.user, AnonymousUser)}
         )
+    

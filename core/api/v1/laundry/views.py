@@ -8,11 +8,12 @@ from rest_framework.authentication import SessionAuthentication
 from django.utils import timezone
 
 from core.api.v1.laundry.serializers import LaundrySerializer
+from core.apps.laundry.exceprtions import RecordStateException
 from core.apps.laundry.models import LaundryRecord
 
 
 class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
-    queryset = LaundryRecord.objects.all()
+    queryset = LaundryRecord.objects.order_by('time_start')
     serializer_class = LaundrySerializer
     authentication_classes = (SessionAuthentication, )
     permission_classes = (IsAuthenticated, )
@@ -32,9 +33,25 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
         record = self.get_object()
 
         if not record.is_available:
-            raise PermissionDenied('Запись уже занята')
+            raise RecordStateException('Запись уже занята')
         
         record.owner = request.user
         record.save()
 
-        return Response({'data': 'Успешная запись'})
+        return Response({'detail': 'Успешная запись'})
+    
+    @action(methods=('POST', ), detail=True)
+    def free_record(self, request, *args, **kwargs):
+        record = self.get_object()
+
+        if record.is_available:
+            raise RecordStateException('Запись уже свободна')
+        
+        if not record.owner == request.user:
+            raise PermissionDenied('Запись вам не принадлежит')
+        
+        record.owner = None
+        record.save()
+
+        return Response({'detail': 'Запись успешно освобождена'})
+        
