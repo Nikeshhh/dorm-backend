@@ -28,7 +28,7 @@ SECRET_KEY = env("DJANGO_SECRET_KEY", default="insecure")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.3.14"]
 
 
 # Application definition
@@ -149,7 +149,8 @@ SESSION_COOKIE_HTTPONLY = True
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
-    'http://127.0.0.1:5173'
+    'http://127.0.0.1:5173',
+    'http://192.168.3.14:5173'
     ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -157,6 +158,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
-    'http://127.0.0.1:5173'
+    'http://127.0.0.1:5173',
+    'http://192.168.3.14:5173'
 ]
 CSRF_COOKIE_NAME = "csrftoken"
