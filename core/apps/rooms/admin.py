@@ -1,11 +1,6 @@
 from django.contrib import admin
 
-from core.apps.rooms.models import Dorm, Block, Room, RoomRecord
-
-
-@admin.register(Dorm)
-class DormLinkAdmin(admin.ModelAdmin):
-    model = Dorm
+from core.apps.rooms.models import Block, Room, RoomRecord
 
 
 @admin.register(Block)
