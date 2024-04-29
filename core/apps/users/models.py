@@ -8,7 +8,11 @@ class CustomUser(AbstractBaseUser):
         max_length=50, unique=True, verbose_name="Имя пользователя"
     )
     email = models.CharField(
-        max_length=50, unique=True, verbose_name="Электронная почта", blank=True
+        max_length=50,
+        unique=True,
+        verbose_name="Электронная почта",
+        blank=True,
+        null=True,
     )
     surname = models.CharField(max_length=40, verbose_name="Фамилия")
     name = models.CharField(max_length=40, verbose_name="Имя")
@@ -39,7 +43,8 @@ class CustomUser(AbstractBaseUser):
         verbose_name_plural = "Пользователи"
 
     def __str__(self) -> str:
-        return f"{self.surname} {self.name} {self.second_name}"
+        fio = f"{self.surname} {self.name} {self.second_name}"
+        return fio if fio.strip() else self.username
 
     def has_perm(self, perm, obj=None):
         return True

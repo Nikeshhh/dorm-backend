@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "core.apps.users.apps.UsersConfig",
     "core.apps.laundry.apps.LaundryConfig",
     "core.apps.rooms.apps.RoomsConfig",
+    "core.apps.duties.apps.DutiesConfig",
     # Third party apps
     "rest_framework",
     "corsheaders",
