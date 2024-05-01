@@ -4,8 +4,10 @@ import pytest
 
 from rest_framework.test import APIClient
 
+from core.apps.duties.models import KitchenDuty
 from core.apps.laundry.models import LaundryRecord
 from core.apps.rooms.models import Block, Room, RoomRecord
+from core.apps.users.models import CustomUser
 
 
 UserModel = get_user_model()
@@ -87,3 +89,24 @@ def admin_client(admin_user):
 def test_rooms_block():
     block = Block.objects.create(floor=1)
     return block
+
+
+@pytest.fixture
+def test_user_for_duty():
+    user_for_duty = CustomUser.objects.create(
+        username="user_for_duty_1", password="123"
+    )
+    return user_for_duty
+
+
+@pytest.fixture
+def test_user_not_in_duty():
+    user_not_in_duty = CustomUser.objects.create(username="user_not_in_duty")
+    return user_not_in_duty
+
+
+@pytest.fixture
+def test_duty(test_user_for_duty):
+    duty = KitchenDuty.objects.create(date=date.today())
+    duty.people.add(test_user_for_duty)
+    return duty

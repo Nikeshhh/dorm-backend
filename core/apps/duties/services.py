@@ -28,12 +28,14 @@ def generate_duty_schedule(date_start: date, date_end: date) -> list[KitchenDuty
             )
         )
         .order_by("finished_duties_this_year", "room__number")
-    )
+    )  # TODO: сделать кастомный генератор
 
     for day in date_range(date_start, date_end):
         duty_item = KitchenDuty.objects.create(date=day)
 
         for _ in range(config.people_per_day):
-            duty_item.people.add(next(people))
+            duty_item.people.add(
+                next(people)
+            )  # TODO: если тут кончатся люди, то сломается все
 
         duty_item.save()

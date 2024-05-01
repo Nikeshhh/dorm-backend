@@ -20,3 +20,6 @@ def test_generate_schedule_success(test_rooms_block):
     generate_duty_schedule(start, end)
 
     assert KitchenDuty.objects.count() == 4
+
+
+# TODO: сделать тесты, где у людей уже есть завершенные дежурства
