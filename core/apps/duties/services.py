@@ -1,4 +1,5 @@
 from datetime import date
+from itertools import cycle
 
 from django.db.models import Count, Q
 
@@ -14,7 +15,7 @@ def generate_duty_schedule(date_start: date, date_end: date) -> list[KitchenDuty
     if not (config := KitchenDutyConfig.objects.first()):
         raise NotConfiguredException("Конфигурация для графиков дежурств отсутствует")
     year_start, year_end = get_current_year_dates()
-    people = (
+    people = cycle(
         pupil
         for pupil in UserModel.objects.prefetch_related("kitchen_duties")
         .annotate(

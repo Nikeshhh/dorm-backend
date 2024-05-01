@@ -1,19 +1,11 @@
 from datetime import date, timedelta
-from core.apps.duties.models import KitchenDuty, KitchenDutyConfig
+from core.apps.duties.models import KitchenDuty
 from core.apps.duties.services import generate_duty_schedule
 import pytest
 
-from core.apps.rooms.models import Room
-from core.apps.users.models import CustomUser
-
 
 @pytest.mark.django_db
-def test_generate_schedule_success(test_rooms_block):
-    KitchenDutyConfig.objects.create(people_per_day=2)
-    for i in range(10):
-        room = Room.objects.create(number=str(i), block=test_rooms_block)
-        CustomUser.objects.create(username=f"bebra#{i}", room=room)
-
+def test_generate_schedule_success(test_users_with_rooms, default_duties_config):
     today = date.today()
     start = today
     end = today + timedelta(days=3)
@@ -22,4 +14,34 @@ def test_generate_schedule_success(test_rooms_block):
     assert KitchenDuty.objects.count() == 4
 
 
-# TODO: сделать тесты, где у людей уже есть завершенные дежурства
+@pytest.mark.django_db
+def test_generate_schedule_success_circular(
+    test_users_with_rooms, default_duties_config
+):
+    today = date.today()
+    start = today
+    end = today + timedelta(days=13)
+    generate_duty_schedule(start, end)
+
+    assert KitchenDuty.objects.count() == 14
+
+
+@pytest.mark.django_db
+def test_generate_schedule_success_with_duties_count_priority(
+    test_users_with_rooms, test_user_with_finished_duties, default_duties_config
+):
+    assert (
+        test_user_with_finished_duties.kitchen_duties.filter(finished=True).count()
+        == 10
+    )
+
+    today = date.today()
+    start = today
+    end = today + timedelta(days=6)
+    generate_duty_schedule(start, end)
+
+    assert KitchenDuty.objects.count() == 7 + 10
+    assert (
+        test_user_with_finished_duties.kitchen_duties.filter(finished=True).count()
+        == 10
+    )

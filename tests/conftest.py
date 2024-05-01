@@ -4,7 +4,7 @@ import pytest
 
 from rest_framework.test import APIClient
 
-from core.apps.duties.models import KitchenDuty
+from core.apps.duties.models import KitchenDuty, KitchenDutyConfig
 from core.apps.laundry.models import LaundryRecord
 from core.apps.rooms.models import Block, Room, RoomRecord
 from core.apps.users.models import CustomUser
@@ -86,6 +86,11 @@ def admin_client(admin_user):
 
 
 @pytest.fixture
+def default_duties_config():
+    return KitchenDutyConfig.objects.create(people_per_day=2)
+
+
+@pytest.fixture
 def test_rooms_block():
     block = Block.objects.create(floor=1)
     return block
@@ -128,3 +133,24 @@ def test_duties(test_users) -> list[KitchenDuty]:
         duty.people.add(test_users[i - 1])
         duties.append(duty)
     return duties
+
+
+@pytest.fixture
+def test_user_with_finished_duties():
+    user = CustomUser.objects.create(username="user_with_duties123")
+    for i in range(1, 11):
+        duty = KitchenDuty.objects.create(date=date.today() + timedelta(days=i))
+        duty.people.add(user)
+        duty.finish()
+    return user
+
+
+@pytest.fixture
+def test_users_with_rooms(test_rooms_block) -> tuple[list]:
+    users = []
+    rooms = []
+    for i in range(10):
+        room = Room.objects.create(number=str(i), block=test_rooms_block)
+        rooms.append(room)
+        users.append(CustomUser.objects.create(username=f"bebra#{i}", room=room))
+    return (users, rooms)
