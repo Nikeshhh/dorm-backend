@@ -110,3 +110,21 @@ def test_duty(test_user_for_duty):
     duty = KitchenDuty.objects.create(date=date.today())
     duty.people.add(test_user_for_duty)
     return duty
+
+
+@pytest.fixture
+def test_users() -> list[CustomUser]:
+    users = []
+    for i in range(1, 11):
+        users.append(CustomUser.objects.create(username=f"user#{i}"))
+    return users
+
+
+@pytest.fixture
+def test_duties(test_users) -> list[KitchenDuty]:
+    duties = []
+    for i in range(1, 11):
+        duty = KitchenDuty.objects.create(date=date.today() + timedelta(days=i))
+        duty.people.add(test_users[i - 1])
+        duties.append(duty)
+    return duties
