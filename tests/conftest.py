@@ -6,6 +6,7 @@ from rest_framework.test import APIClient
 
 from core.apps.duties.models import KitchenDuty, KitchenDutyConfig
 from core.apps.laundry.models import LaundryRecord
+from core.apps.proposals.models import RepairProposal
 from core.apps.rooms.models import Block, Room, RoomRecord
 from core.apps.users.models import CustomUser
 
@@ -154,3 +155,20 @@ def test_users_with_rooms(test_rooms_block) -> tuple[list]:
         rooms.append(room)
         users.append(CustomUser.objects.create(username=f"bebra#{i}", room=room))
     return (users, rooms)
+
+
+@pytest.fixture
+def test_worker_user():
+    return CustomUser.objects.create(username="santechnik")
+
+
+@pytest.fixture
+def other_worker_user():
+    return CustomUser.objects.create(username="droogoi")
+
+
+@pytest.fixture
+def test_proposal(test_users):
+    author = test_users[0]
+    proposal = RepairProposal.objects.create(author=author, description="Сломался кран")
+    return proposal
