@@ -87,21 +87,26 @@ class SwapDutiesRequest(models.Model):
         related_name="addressed_swap_duties_requests",
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    accepted = models.BooleanField(default=False, verbose_name="Принята?")
     declined = models.BooleanField(default=False, verbose_name="Отклонена?")
     canceled = models.BooleanField(default=False, verbose_name="Отменена?")
 
     def accept(self, user: CustomUser):
+        if not self.is_mutable:
+            raise SwapRequestStatusException
         if self.second_user != user:
             raise DutySwapException(
                 f"Пользователь {user} не может принять заявку {self}, так как не имеет к ней доступа"
             )
-        if self.declined:
-            raise SwapRequestStatusException
         with atomic():
             self.first_duty.swap_pupils(self.first_user, self.second_user)
             self.second_duty.swap_pupils(self.second_user, self.first_user)
+            self.accepted = True
+            self.save()
 
     def decline(self, user: CustomUser):
+        if not self.is_mutable:
+            raise SwapRequestStatusException
         if self.second_user != user:
             raise DutySwapException(
                 f"Пользователь {user} не может отклонить заявку {self}, так как не имеет к ней доступа"
@@ -109,7 +114,13 @@ class SwapDutiesRequest(models.Model):
         self.declined = True
         self.save()
 
+    @property
+    def is_mutable(self):
+        return not (self.canceled or self.declined or self.accepted)
+
     def cancel(self, user: CustomUser):
+        if not self.is_mutable:
+            raise SwapRequestStatusException
         if self.first_user != user:
             raise DutySwapException(
                 f"Пользователь {user} не может отменить заявку {self}, так как не является ее инициатором"
@@ -148,19 +159,24 @@ class SwapPeopleRequest(models.Model):
         related_name="addressed_swap_people_requests",
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    accepted = models.BooleanField(default=False, verbose_name="Принята?")
     declined = models.BooleanField(default=False, verbose_name="Отклонена?")
     canceled = models.BooleanField(default=False, verbose_name="Отменена?")
 
     def accept(self, user: CustomUser):
+        if not self.is_mutable:
+            raise SwapRequestStatusException
         if self.to_swap != user:
             raise DutySwapException(
                 f"Пользователь {user} не может принять заявку {self}, так как не имеет к ней доступа"
             )
-        if self.declined:
-            raise SwapRequestStatusException
+        self.accepted = True
+        self.save()
         self.duty.swap_pupils(self.current_user, self.to_swap)
 
     def decline(self, user: CustomUser):
+        if not self.is_mutable:
+            raise SwapRequestStatusException
         if self.to_swap != user:
             raise DutySwapException(
                 f"Пользователь {user} не может отклонить заявку {self}, так как не имеет к ней доступа"
@@ -169,12 +185,18 @@ class SwapPeopleRequest(models.Model):
         self.save()
 
     def cancel(self, user: CustomUser):
+        if not self.is_mutable:
+            raise SwapRequestStatusException
         if self.current_user != user:
             raise DutySwapException(
                 f"Пользователь {user} не может отменить заявку {self}, так как не является ее инициатором"
             )
         self.canceled = True
         self.save()
+
+    @property
+    def is_mutable(self):
+        return not (self.canceled or self.declined or self.accepted)
 
     def save(self, *args, **kwargs) -> None:
         if not self.current_user.is_resident or not self.to_swap.is_resident:

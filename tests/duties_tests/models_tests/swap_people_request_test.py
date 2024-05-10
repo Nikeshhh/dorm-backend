@@ -21,6 +21,12 @@ def test_swap_people_accept_success(test_duties, test_users):
     assert user1 not in target_duty.people.all()
     assert user2 in target_duty.people.all()
 
+    swap_request.refresh_from_db()
+    assert swap_request.is_mutable is False
+    assert swap_request.accepted is True
+    assert swap_request.declined is False
+    assert swap_request.canceled is False
+
 
 @pytest.mark.django_db
 def test_swap_people_decline_success(test_duties, test_users):
@@ -40,7 +46,10 @@ def test_swap_people_decline_success(test_duties, test_users):
     assert user2 not in target_duty.people.all()
 
     swap_request.refresh_from_db()
+    assert swap_request.is_mutable is False
+    assert swap_request.accepted is False
     assert swap_request.declined is True
+    assert swap_request.canceled is False
 
 
 @pytest.mark.django_db

@@ -1,6 +1,6 @@
 import pytest
 
-from core.apps.duties.exceptions import DutySwapException
+from core.apps.duties.exceptions import DutySwapException, SwapRequestStatusException
 from core.apps.duties.models import SwapDutiesRequest
 
 
@@ -24,6 +24,12 @@ def test_swap_duties_accept_success(test_duties, test_users):
     assert user2 not in duty2.people.all()
     assert user2 in duty1.people.all()
 
+    swap_request.refresh_from_db()
+    assert swap_request.is_mutable is False
+    assert swap_request.accepted is True
+    assert swap_request.declined is False
+    assert swap_request.canceled is False
+
 
 @pytest.mark.django_db
 def test_swap_duties_decline_success(test_duties, test_users):
@@ -46,7 +52,10 @@ def test_swap_duties_decline_success(test_duties, test_users):
     assert user2 not in duty1.people.all()
 
     swap_request.refresh_from_db()
+    assert swap_request.is_mutable is False
+    assert swap_request.accepted is False
     assert swap_request.declined is True
+    assert swap_request.canceled is False
 
 
 @pytest.mark.django_db
@@ -70,7 +79,7 @@ def test_swap_duties_creation_error_same_duty(test_duties, test_users):
 
 @pytest.mark.django_db
 def test_swap_duties_error_same_user(test_duties, test_users):
-    """Успешное отклонение заявки с сохранением исходного состояния"""
+    """Ошибка отклонения заявки с сохранением исходного состояния при попытке замены себя на себя"""
     user1 = user2 = test_users[0]
     duty1, duty2 = test_duties[0], test_duties[1]
 
@@ -78,3 +87,38 @@ def test_swap_duties_error_same_user(test_duties, test_users):
         SwapDutiesRequest.objects.create(
             first_duty=duty1, first_user=user1, second_duty=duty2, second_user=user2
         )
+
+
+@pytest.mark.django_db
+def test_swap_duties_cancel_success(test_duties, test_users):
+    user1, user2 = test_users[:2]
+    duty1, duty2 = user1.kitchen_duties.first(), user2.kitchen_duties.first()
+
+    assert user1 in duty1.people.all()
+    assert user1 not in duty2.people.all()
+    assert user2 in duty2.people.all()
+    assert user2 not in duty1.people.all()
+
+    swap_request = SwapDutiesRequest.objects.create(
+        first_duty=duty1, first_user=user1, second_duty=duty2, second_user=user2
+    )
+
+    swap_request.cancel(user1)
+
+    with pytest.raises(SwapRequestStatusException):
+        swap_request.accept(user2)
+        swap_request.decline(user2)
+
+    duty1.refresh_from_db()
+    duty2.refresh_from_db()
+
+    assert user1 in duty1.people.all()
+    assert user1 not in duty2.people.all()
+    assert user2 in duty2.people.all()
+    assert user2 not in duty1.people.all()
+
+    swap_request.refresh_from_db()
+    assert swap_request.is_mutable is False
+    assert swap_request.accepted is False
+    assert swap_request.declined is False
+    assert swap_request.canceled is True
