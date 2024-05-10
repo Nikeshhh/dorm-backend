@@ -82,6 +82,12 @@ def test_accept_swap_duties_request(
     assert user1 in duty2.people.all()
     assert user2 in duty1.people.all()
 
+    swap_request.refresh_from_db()
+    assert swap_request.is_mutable is False
+    assert swap_request.accepted is True
+    assert swap_request.declined is False
+    assert swap_request.canceled is False
+
 
 @pytest.mark.django_db
 def test_decline_swap_duties_request(
@@ -114,3 +120,48 @@ def test_decline_swap_duties_request(
     assert user2 in duty2.people.all()
     assert user1 not in duty2.people.all()
     assert user2 not in duty1.people.all()
+
+    swap_request.refresh_from_db()
+    assert swap_request.is_mutable is False
+    assert swap_request.accepted is False
+    assert swap_request.declined is True
+    assert swap_request.canceled is False
+
+
+@pytest.mark.django_db
+def test_cancel_swap_duties_request(
+    user_client, user_for_client, test_users, test_duties
+):
+    user1, user2 = user_for_client, test_users[1]
+    duty1, duty2 = user1.kitchen_duties.first(), user2.kitchen_duties.first()
+
+    assert user1 in duty1.people.all()
+    assert user2 in duty2.people.all()
+    assert user1 not in duty2.people.all()
+    assert user2 not in duty1.people.all()
+
+    swap_request = SwapDutiesRequest.objects.create(
+        first_user=user1,
+        second_user=user2,
+        first_duty=duty1,
+        second_duty=duty2,
+    )
+
+    url = reverse("duty-swaps-cancel-swap-duties-request", args=(swap_request.pk,))
+    response = user_client.post(url)
+
+    assert response.status_code == HTTP_200_OK, print(response.json())
+
+    duty1.refresh_from_db()
+    duty2.refresh_from_db()
+
+    assert user1 in duty1.people.all()
+    assert user2 in duty2.people.all()
+    assert user1 not in duty2.people.all()
+    assert user2 not in duty1.people.all()
+
+    swap_request.refresh_from_db()
+    assert swap_request.is_mutable is False
+    assert swap_request.accepted is False
+    assert swap_request.declined is False
+    assert swap_request.canceled is True

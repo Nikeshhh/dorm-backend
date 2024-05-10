@@ -68,6 +68,14 @@ class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)
 
+    @action(methods=("POST",), detail=True)
+    def cancel_swap_duties_request(self, request, pk, *args, **kwargs):
+        swap_request: SwapDutiesRequest = self.get_object()
+        swap_request.cancel(request.user)
+
+        serializer = self.get_serializer(swap_request)
+        return Response(serializer.data, status=HTTP_200_OK)
+
     @action(methods=("POST",), detail=False)
     def create_swap_duties_request(self, request, *args, **kwargs):
         initiator = request.user
@@ -119,6 +127,14 @@ class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
     def decline_swap_people_request(self, request, pk, *args, **kwargs):
         swap_request: SwapPeopleRequest = self.get_object()
         swap_request.decline(request.user)
+
+        serializer = self.get_serializer(swap_request)
+        return Response(serializer.data, status=HTTP_200_OK)
+
+    @action(methods=("POST",), detail=True)
+    def cancel_swap_people_request(self, request, pk, *args, **kwargs):
+        swap_request: SwapPeopleRequest = self.get_object()
+        swap_request.cancel(request.user)
 
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)

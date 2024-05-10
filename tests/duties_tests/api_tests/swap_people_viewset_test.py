@@ -57,6 +57,12 @@ def test_accept_swap_duties_request(
     assert user1 in target_duty.people.all()
     assert user2 not in target_duty.people.all()
 
+    swap_request.refresh_from_db()
+    assert swap_request.is_mutable is False
+    assert swap_request.accepted is True
+    assert swap_request.declined is False
+    assert swap_request.canceled is False
+
 
 @pytest.mark.django_db
 def test_decline_swap_duties_request(
@@ -81,3 +87,40 @@ def test_decline_swap_duties_request(
 
     assert user1 not in target_duty.people.all()
     assert user2 in target_duty.people.all()
+
+    swap_request.refresh_from_db()
+    assert swap_request.is_mutable is False
+    assert swap_request.accepted is False
+    assert swap_request.declined is True
+    assert swap_request.canceled is False
+
+
+@pytest.mark.django_db
+def test_cancel_swap_duties_request(
+    user_client, user_for_client, test_users, test_duties
+):
+    target_duty = test_duties[0]
+    user1, user2 = test_users[1], user_for_client
+
+    assert user1 not in target_duty.people.all()
+    assert user2 in target_duty.people.all()
+
+    swap_request = SwapPeopleRequest.objects.create(
+        duty=target_duty, current_user=user2, to_swap=user1
+    )
+
+    url = reverse("people-swaps-cancel-swap-people-request", args=(swap_request.pk,))
+    response = user_client.post(url)
+
+    assert response.status_code == HTTP_200_OK, print(response.json())
+
+    target_duty.refresh_from_db()
+
+    assert user1 not in target_duty.people.all()
+    assert user2 in target_duty.people.all()
+
+    swap_request.refresh_from_db()
+    assert swap_request.is_mutable is False
+    assert swap_request.accepted is False
+    assert swap_request.declined is False
+    assert swap_request.canceled is True
