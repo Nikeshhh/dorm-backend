@@ -1,10 +1,13 @@
 from django.db import models
 
+from core.apps.common.validators import user_is_worker
 from core.apps.proposals.choices import PROPOSAL_STATUS_CHOICES
 from core.apps.proposals.exceptions import (
     ProposalAccessException,
     ProposalStatusException,
 )
+from core.apps.rooms.exceptions import NoRoomException
+from core.apps.users.exceptions import RoleViolationException
 from core.apps.users.models import CustomUser
 
 
@@ -33,6 +36,7 @@ class RepairProposal(models.Model):
         "users.CustomUser",
         verbose_name="Исполнитель заявки",
         on_delete=models.SET_NULL,
+        validators=[user_is_worker],
         null=True,
     )
 
@@ -54,6 +58,8 @@ class RepairProposal(models.Model):
 
     def accept(self, executor: CustomUser) -> None:
         # Доступно только для заявок со статусом "Открыта" (0)
+        if not executor.is_worker:
+            raise RoleViolationException
         if self.executor:
             if self.executor == executor:
                 raise ProposalStatusException(
@@ -70,6 +76,8 @@ class RepairProposal(models.Model):
 
     def decline(self, executor: CustomUser) -> None:
         # Доступно только для заявок со статусом "Выполняется" (1)
+        if not executor.is_worker:
+            raise RoleViolationException
         if self.executor != executor:
             raise ProposalAccessException(
                 f"{executor} не имеет доступа к заявке {self}"
@@ -90,3 +98,10 @@ class RepairProposal(models.Model):
             raise ProposalStatusException(f"{self} не может быть закрыта")
         self.status = 2
         self.save()
+
+    def save(self, *args, **kwargs):
+        if not self.author.is_resident:
+            raise RoleViolationException
+        if self.author.room is None:
+            raise NoRoomException
+        return super().save(*args, **kwargs)

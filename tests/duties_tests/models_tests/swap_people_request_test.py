@@ -16,7 +16,7 @@ def test_swap_people_accept_success(test_duties, test_users):
         current_user=user1, to_swap=user2, duty=target_duty
     )
 
-    swap_request.accept()
+    swap_request.accept(user2)
 
     assert user1 not in target_duty.people.all()
     assert user2 in target_duty.people.all()
@@ -34,12 +34,13 @@ def test_swap_people_decline_success(test_duties, test_users):
         current_user=user1, to_swap=user2, duty=target_duty
     )
 
-    swap_request.decline()
+    swap_request.decline(user2)
 
     assert user1 in target_duty.people.all()
     assert user2 not in target_duty.people.all()
-    with pytest.raises(SwapPeopleRequest.DoesNotExist):
-        swap_request.refresh_from_db()
+
+    swap_request.refresh_from_db()
+    assert swap_request.declined is True
 
 
 @pytest.mark.django_db

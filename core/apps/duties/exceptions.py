@@ -11,3 +11,8 @@ class DutyIsLockedException(DutiesBaseAPIException):
 
 class DutySwapException(DutiesBaseAPIException):
     status_code = HTTP_400_BAD_REQUEST
+
+
+class SwapRequestStatusException(DutiesBaseAPIException):
+    status_code = HTTP_400_BAD_REQUEST
+    default_detail = "Статус заявки не позволяет провести это действие"

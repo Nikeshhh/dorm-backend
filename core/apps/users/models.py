@@ -28,8 +28,10 @@ class CustomUser(AbstractBaseUser):
     # group = models.ForeignKey(Group, verbose_name='Группа', on_delete=models.SET_NULL, null=True)
 
     active = models.BooleanField(default=True)
-    staff = models.BooleanField(default=False)
-    admin = models.BooleanField(default=False)
+    resident = models.BooleanField(default=True)  # проживающий
+    staff = models.BooleanField(default=False)  # член студсовета
+    admin = models.BooleanField(default=False)  # администратор
+    worker = models.BooleanField(default=False)  # работник
 
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -63,3 +65,11 @@ class CustomUser(AbstractBaseUser):
     @property
     def is_active(self):
         return self.active
+
+    @property
+    def is_worker(self):
+        return self.worker
+
+    @property
+    def is_resident(self):
+        return self.resident

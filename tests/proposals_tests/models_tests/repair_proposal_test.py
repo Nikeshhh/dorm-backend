@@ -4,6 +4,7 @@ from core.apps.proposals.exceptions import (
     ProposalAccessException,
     ProposalStatusException,
 )
+from core.apps.users.exceptions import RoleViolationException
 
 
 @pytest.mark.django_db
@@ -18,6 +19,14 @@ def test_proposal_cycle_success(test_proposal, test_worker_user):
 
     test_proposal.refresh_from_db()
     assert test_proposal.status == 2
+
+
+@pytest.mark.django_db
+def test_proposal_accept_fail_not_worker(test_proposal, test_user):
+    assert test_proposal.status == 0
+
+    with pytest.raises(RoleViolationException):
+        test_proposal.accept(test_user)
 
 
 @pytest.mark.django_db

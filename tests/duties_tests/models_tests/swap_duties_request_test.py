@@ -14,7 +14,7 @@ def test_swap_duties_accept_success(test_duties, test_users):
         first_duty=duty1, first_user=user1, second_duty=duty2, second_user=user2
     )
 
-    swap_request.accept()
+    swap_request.accept(user2)
 
     duty1.refresh_from_db()
     duty2.refresh_from_db()
@@ -35,7 +35,7 @@ def test_swap_duties_decline_success(test_duties, test_users):
         first_duty=duty1, first_user=user1, second_duty=duty2, second_user=user2
     )
 
-    swap_request.decline()
+    swap_request.decline(user2)
 
     duty1.refresh_from_db()
     duty2.refresh_from_db()
@@ -45,8 +45,8 @@ def test_swap_duties_decline_success(test_duties, test_users):
     assert user2 in duty2.people.all()
     assert user2 not in duty1.people.all()
 
-    with pytest.raises(SwapDutiesRequest.DoesNotExist):
-        swap_request.refresh_from_db()
+    swap_request.refresh_from_db()
+    assert swap_request.declined is True
 
 
 @pytest.mark.django_db

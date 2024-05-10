@@ -1,5 +1,6 @@
 from django.db import models
 
+from core.apps.common.validators import user_is_staff
 from core.apps.rooms.choices import ROOM_GRADE_CHOICES
 from core.apps.users.models import CustomUser
 
@@ -42,7 +43,10 @@ class RoomRecord(models.Model):
         related_name="room_records",
     )
     author = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, verbose_name="Ответственный"
+        CustomUser,
+        on_delete=models.CASCADE,
+        verbose_name="Ответственный",
+        validators=[user_is_staff],
     )
 
     def __str__(self) -> str:
