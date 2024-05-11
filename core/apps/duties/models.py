@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.transaction import atomic
 
-from core.apps.common.validators import user_is_resident
 from core.apps.duties.exceptions import (
     DutyIsLockedException,
     DutySwapException,
@@ -31,7 +30,6 @@ class KitchenDuty(models.Model):
         UserModel,
         verbose_name="Ответственные",
         related_name="kitchen_duties",
-        validators=[user_is_resident],
     )
     finished = models.BooleanField(verbose_name="Завершено?", default=False)
 
