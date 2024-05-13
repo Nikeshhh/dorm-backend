@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.exceptions import AuthenticationFailed
 
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import AnonymousUser
 
 from core.api.v1.authentication.serializers import LoginSerializer
@@ -13,26 +13,27 @@ from core.api.v1.authentication.serializers import LoginSerializer
 class AuthenticationViewSet(GenericViewSet):
     serializer_class = LoginSerializer
 
-    @action(methods=('POST', ), detail=False)
+    @action(methods=("POST",), detail=False)
     def login(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
+        username = request.data.get("username")
+        password = request.data.get("password")
 
         user = authenticate(username=username, password=password)
 
         if user is None:
             raise AuthenticationFailed()
-        
+
         login(request, user)
 
-        return Response(
-            {'data': 'Успешная авторизация'},
-            HTTP_200_OK
-        )
-    
-    @action(methods=('GET', ), detail=False)
+        return Response({"data": "Успешная авторизация"}, HTTP_200_OK)
+
+    @action(methods=("POST",), detail=False)
+    def logout(self, request, *args, **kwargs):
+        logout(request)
+        return Response({"data": "Успешный выход из аккаунта"}, HTTP_200_OK)
+
+    @action(methods=("GET",), detail=False)
     def is_authenticated(self, request, *args, **kwargs):
         return Response(
-            {'is_authenticated': not isinstance(request.user, AnonymousUser)}
+            {"is_authenticated": not isinstance(request.user, AnonymousUser)}
         )
-    
