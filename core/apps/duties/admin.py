@@ -1,3 +1,8 @@
-from django.contrib import admin  # noqa
+from django.contrib import admin
 
-# Register your models here.
+from core.apps.duties.models import KitchenDuty  # noqa
+
+
+@admin.register(KitchenDuty)
+class KitchenDutyAdmin(admin.ModelAdmin):
+    model = KitchenDuty

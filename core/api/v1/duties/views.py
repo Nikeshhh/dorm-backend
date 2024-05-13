@@ -26,11 +26,18 @@ class DutyRecordsViewSet(ListModelMixin, GenericViewSet):
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    @action(methods=("GET",), detail=False)
+    def my_duties(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
         today = datetime.today()
-        return self.queryset.filter(
-            Q(date__gt=today), Q(date__lte=today + timedelta(days=28))
+        queryset = self.queryset.filter(
+            Q(date__gte=today), Q(date__lte=today + timedelta(days=28))
         )
+        if self.action == "my_duties":
+            queryset = queryset.filter(people=self.request.user)
+        return queryset
 
 
 class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
