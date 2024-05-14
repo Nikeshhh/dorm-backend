@@ -30,6 +30,10 @@ class DutyRecordsViewSet(ListModelMixin, GenericViewSet):
     def my_duties(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @action(methods=("GET",), detail=False)
+    def nearest_duty(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
         today = datetime.today()
         queryset = self.queryset.filter(
@@ -37,6 +41,8 @@ class DutyRecordsViewSet(ListModelMixin, GenericViewSet):
         )
         if self.action == "my_duties":
             queryset = queryset.filter(people=self.request.user)
+        if self.action == "nearest_duty":
+            queryset = queryset.filter(people=self.request.user)[:1]
         return queryset
 
 
