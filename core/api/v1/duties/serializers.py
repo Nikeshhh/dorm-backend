@@ -17,7 +17,7 @@ class ResidentSerializer(Serializer):
     room = SerializerMethodField()
 
     def get_room(self, obj):
-        return str(obj.room) if obj.room else None
+        return obj.room.number if obj.room else None
 
 
 class KitchenDutySerializer(Serializer):
@@ -33,8 +33,11 @@ class SwapDutiesRequestSerializer(Serializer):
     second_user = ResidentSerializer()
     first_duty = KitchenDutySerializer(many=False)
     second_duty = KitchenDutySerializer(many=False)
-    created_at = DateTimeField()
+
+    accepted = BooleanField()
+    canceled = BooleanField()
     declined = BooleanField()
+    created_at = DateTimeField()
 
 
 class CreateSwapDutiesRequestSerializer(Serializer):
@@ -47,8 +50,12 @@ class SwapPeopleRequestSerializer(Serializer):
     pk = IntegerField()
     current_user = ResidentSerializer()
     to_swap = ResidentSerializer()
-    created_at = DateTimeField()
+    duty = KitchenDutySerializer(many=False)
+
+    accepted = BooleanField()
+    canceled = BooleanField()
     declined = BooleanField()
+    created_at = DateTimeField()
 
 
 class CreateSwapPeopleRequestSerializer(Serializer):

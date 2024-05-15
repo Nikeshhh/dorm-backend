@@ -46,6 +46,36 @@ class DutyRecordsViewSet(ListModelMixin, GenericViewSet):
         return queryset
 
 
+class SwapRequestsViewSet(ListModelMixin, GenericViewSet):
+    queryset = SwapDutiesRequest.objects.order_by("-created_at")
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get_serializer(self, serializer_class, *args, **kwargs):
+        return serializer_class(*args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        swap_people_queryset = SwapPeopleRequest.objects.filter(
+            to_swap=request.user
+        ).order_by("-created_at")
+        swap_duties_queryset = SwapDutiesRequest.objects.filter(
+            second_user=request.user
+        ).order_by("-created_at")
+
+        swap_people_serializer = self.get_serializer(
+            SwapPeopleRequestSerializer, swap_people_queryset, many=True
+        )
+        swap_duties_serializer = self.get_serializer(
+            SwapDutiesRequestSerializer, swap_duties_queryset, many=True
+        )
+
+        data = sorted(
+            swap_duties_serializer.data + swap_people_serializer.data,
+            key=lambda x: x["created_at"],
+        )
+        return Response(data)
+
+
 class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
     queryset = SwapDutiesRequest.objects.order_by("-created_at")
     serializer_class = SwapDutiesRequestSerializer
@@ -63,7 +93,13 @@ class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
     def get_queryset(self):
         if self.action == "list":
             return self.queryset.filter(first_user=self.request.user)
+        if self.action == "get_incoming_requests":
+            return self.queryset.filter(second_user=self.request.user)
         return self.queryset
+
+    @action(methods=("GET",), detail=False)
+    def get_incoming_requests(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     @action(methods=("POST",), detail=True)
     def accept_swap_duties_request(self, request, pk, *args, **kwargs):
@@ -126,7 +162,13 @@ class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
     def get_queryset(self):
         if self.action == "list":
             return self.queryset.filter(current_user=self.request.user)
+        if self.action == "get_incoming_requests":
+            return self.queryset.filter(to_swap=self.request.user)
         return self.queryset
+
+    @action(methods=("GET",), detail=False)
+    def get_incoming_requests(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     @action(methods=("POST",), detail=True)
     def accept_swap_people_request(self, request, pk, *args, **kwargs):
