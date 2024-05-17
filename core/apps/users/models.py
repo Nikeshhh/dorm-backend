@@ -25,8 +25,6 @@ class CustomUser(AbstractBaseUser):
         verbose_name="Комната проживания",
     )
 
-    # group = models.ForeignKey(Group, verbose_name='Группа', on_delete=models.SET_NULL, null=True)
-
     active = models.BooleanField(default=True)
     resident = models.BooleanField(default=True)  # проживающий
     staff = models.BooleanField(default=False)  # член студсовета

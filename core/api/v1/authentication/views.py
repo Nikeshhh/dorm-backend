@@ -15,10 +15,9 @@ class AuthenticationViewSet(GenericViewSet):
 
     @action(methods=("POST",), detail=False)
     def login(self, request, *args, **kwargs):
-        username = request.data.get("username")
-        password = request.data.get("password")
+        serializer = self.get_serializer(request.data)
 
-        user = authenticate(username=username, password=password)
+        user = authenticate(**serializer.data)
 
         if user is None:
             raise AuthenticationFailed()
