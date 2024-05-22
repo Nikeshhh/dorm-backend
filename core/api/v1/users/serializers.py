@@ -20,4 +20,4 @@ class ResidentSerializer(Serializer):
     room_number = SerializerMethodField()
 
     def get_room_number(self, instance):
-        return instance.room.number
+        return instance.room.number if instance.room else "No room"

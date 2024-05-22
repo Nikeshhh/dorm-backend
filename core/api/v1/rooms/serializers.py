@@ -8,9 +8,18 @@ from rest_framework.serializers import (
 from rest_framework.exceptions import NotFound
 
 from core.apps.rooms.models import Room, RoomRecord
+from core.apps.users.models import CustomUser
+
+
+class RecordAuthorSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ("surname", "name", "second_name")
 
 
 class ReadRoomRecordSerializer(ModelSerializer):
+    author = RecordAuthorSerializer()
+
     class Meta:
         model = RoomRecord
         fields = (

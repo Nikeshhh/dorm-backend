@@ -7,6 +7,8 @@ from rest_framework.mixins import (
 )
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK
 
 from core.api.v1.rooms.serializers import (
     ReadRoomRecordSerializer,
@@ -27,6 +29,14 @@ class RoomRecordsViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    @action(methods=("GET",), detail=False)
+    def my_last_room_record(self, request, *args, **kwargs):
+        last_record = self.get_queryset().first()
+
+        serializer = self.get_serializer(last_record)
+
+        return Response(serializer.data, HTTP_200_OK)
 
 
 class CreateRoomRecordsViewSet(

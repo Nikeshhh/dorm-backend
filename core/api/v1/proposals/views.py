@@ -23,9 +23,13 @@ class RepairProposalsViewSet(ListModelMixin, GenericViewSet):
         return super().get_serializer(*args, **kwargs)
 
     def get_queryset(self):
-        if self.action == "list":
+        if self.action == "my_proposals":
             return self.queryset.filter(author=self.request.user)
         return super().get_queryset()
+
+    @action(methods=("GET",), detail=False)
+    def my_proposals(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     @action(methods=("POST",), detail=True)
     def accept(self, request, pk, *args, **kwargs):

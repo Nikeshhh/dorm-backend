@@ -26,14 +26,6 @@ class DutyRecordsViewSet(ListModelMixin, GenericViewSet):
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    @action(methods=("GET",), detail=False)
-    def my_duties(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @action(methods=("GET",), detail=False)
-    def nearest_duty(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
     def get_queryset(self):
         today = datetime.today()
         queryset = self.queryset.filter(
@@ -44,6 +36,27 @@ class DutyRecordsViewSet(ListModelMixin, GenericViewSet):
         if self.action == "nearest_duty":
             queryset = queryset.filter(people=self.request.user)[:1]
         return queryset
+
+    @action(methods=("GET",), detail=True)
+    def duties_to_swap(self, request, pk, *args, **kwargs):
+        current = self.get_object()
+        queryset = self.get_queryset().exclude(pk=current.pk)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(methods=("GET",), detail=False)
+    def my_duties(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @action(methods=("GET",), detail=False)
+    def nearest_duty(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class SwapRequestsViewSet(ListModelMixin, GenericViewSet):
