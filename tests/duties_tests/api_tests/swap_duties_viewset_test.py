@@ -8,6 +8,10 @@ from core.apps.duties.models import SwapDutiesRequest
 
 @pytest.mark.django_db
 def test_list(user_client, user_for_client, test_users, test_duties):
+    """
+    Тестирует получение списка запросов на обмен для конкретного пользователя.
+    Убеждается что пользователю приходят только входящие запросы.
+    """
     user1, user2 = user_for_client, test_users[1]
     duty1, duty2 = user1.kitchen_duties.first(), user2.kitchen_duties.first()
 
@@ -29,6 +33,9 @@ def test_list(user_client, user_for_client, test_users, test_duties):
 def test_create_swap_duties_request(
     user_client, user_for_client, test_users, test_duties
 ):
+    """
+    Тестирует успешное создание запроса на обмен.
+    """
     user1, user2 = user_for_client, test_users[1]
     duty1, duty2 = user1.kitchen_duties.first(), user2.kitchen_duties.first()
 
@@ -54,6 +61,10 @@ def test_create_swap_duties_request(
 def test_accept_swap_duties_request(
     user_client, user_for_client, test_users, test_duties
 ):
+    """
+    Тестирует успешное принятие запроса на обмен.
+    Проверяет состояние до и после принятия запроса.
+    """
     user1, user2 = user_for_client, test_users[1]
     duty1, duty2 = user1.kitchen_duties.first(), user2.kitchen_duties.first()
 
@@ -93,6 +104,10 @@ def test_accept_swap_duties_request(
 def test_decline_swap_duties_request(
     user_client, user_for_client, test_users, test_duties
 ):
+    """
+    Тестирует успешное отклонение запроса на обмен.
+    Проверяет состояние до и после отмены.
+    """
     user1, user2 = user_for_client, test_users[1]
     duty1, duty2 = user1.kitchen_duties.first(), user2.kitchen_duties.first()
 
@@ -132,6 +147,10 @@ def test_decline_swap_duties_request(
 def test_cancel_swap_duties_request(
     user_client, user_for_client, test_users, test_duties
 ):
+    """
+    Тестиирует успешную отмену запроса на обмен.
+    Проверяет состояние до и после отмены.
+    """
     user1, user2 = user_for_client, test_users[1]
     duty1, duty2 = user1.kitchen_duties.first(), user2.kitchen_duties.first()
 

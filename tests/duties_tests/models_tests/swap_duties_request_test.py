@@ -91,6 +91,10 @@ def test_swap_duties_error_same_user(test_duties, test_users):
 
 @pytest.mark.django_db
 def test_swap_duties_cancel_success(test_duties, test_users):
+    """
+    Тестирует успешную отмену запроса на обмен.
+    Проверяет состояние до и после отмены.
+    """
     user1, user2 = test_users[:2]
     duty1, duty2 = user1.kitchen_duties.first(), user2.kitchen_duties.first()
 

@@ -6,6 +6,7 @@ from rest_framework.serializers import (
 )
 
 from core.api.v1.duties.serializers import ResidentSerializer
+from core.apps.proposals.models import RepairProposal
 
 
 class ExecutorSerializer(Serializer):
@@ -16,9 +17,18 @@ class ExecutorSerializer(Serializer):
 
 
 class RepairProposalSerializer(Serializer):
-    pk = IntegerField()
-    author = ResidentSerializer()
+    pk = IntegerField(required=False)
+    author = ResidentSerializer(required=False)
     description = CharField()
-    status = IntegerField()
-    created_at = DateTimeField()
-    executor = ExecutorSerializer()
+    status = IntegerField(required=False)
+    created_at = DateTimeField(required=False)
+    executor = ExecutorSerializer(required=False)
+
+    def create(self, validated_data):
+        description = validated_data.get("description")
+
+        instance = RepairProposal.objects.create(
+            description=description, author=self.context.get("request").user
+        )
+
+        return instance

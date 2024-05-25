@@ -1,6 +1,5 @@
 from django.db import models
 
-from core.apps.common.validators import user_is_worker
 from core.apps.proposals.choices import PROPOSAL_STATUS_CHOICES
 from core.apps.proposals.exceptions import (
     ProposalAccessException,
@@ -36,7 +35,6 @@ class RepairProposal(models.Model):
         "users.CustomUser",
         verbose_name="Исполнитель заявки",
         on_delete=models.SET_NULL,
-        validators=[user_is_worker],
         null=True,
     )
 

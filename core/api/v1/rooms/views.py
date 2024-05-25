@@ -1,3 +1,4 @@
+from datetime import timedelta
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import (
     ListModelMixin,
@@ -17,6 +18,8 @@ from core.api.v1.rooms.serializers import (
     StuffRoomRecordSerializer,
 )
 from core.apps.rooms.models import Room, RoomRecord
+
+from django.utils import timezone
 
 
 class RoomRecordsViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
@@ -55,7 +58,16 @@ class CreateRoomRecordsViewSet(
 
     def get_queryset(self):
         if self.action == "today_created":
-            return super().get_queryset().filter(author=self.request.user)
+            today_date = timezone.now().date()
+            return (
+                super()
+                .get_queryset()
+                .filter(
+                    author=self.request.user,
+                    date__gte=today_date,
+                    date__lt=today_date + timedelta(days=1),
+                )
+            )
         if self.action == "list":
             return Room.objects.order_by("-number")
         return super().get_queryset()

@@ -6,6 +6,9 @@ import pytest
 
 @pytest.mark.django_db
 def test_generate_schedule_success(test_users_with_rooms, default_duties_config):
+    """
+    Тестирует успешную генерацию графиков дежурств.
+    """
     today = date.today()
     start = today
     end = today + timedelta(days=3)
@@ -18,6 +21,9 @@ def test_generate_schedule_success(test_users_with_rooms, default_duties_config)
 def test_generate_schedule_success_circular(
     test_users_with_rooms, default_duties_config
 ):
+    """
+    Тестирует случай, когда генерация успешно выбирает проживающих по второму кругу.
+    """
     today = date.today()
     start = today
     end = today + timedelta(days=13)
@@ -30,6 +36,9 @@ def test_generate_schedule_success_circular(
 def test_generate_schedule_success_with_duties_count_priority(
     test_users_with_rooms, test_user_with_finished_duties, default_duties_config
 ):
+    """
+    Тестирует случай, когда проживающему с большим количеством завершенных дежурств не присваивается дежурство.
+    """
     assert (
         test_user_with_finished_duties.kitchen_duties.filter(finished=True).count()
         == 10

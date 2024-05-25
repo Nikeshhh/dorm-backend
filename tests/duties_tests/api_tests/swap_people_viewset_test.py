@@ -13,6 +13,9 @@ def test_list(): ...
 def test_create_swap_people_request(
     user_client, user_for_client, test_users, test_duties
 ):
+    """
+    Тестирует успешное создание запроса на замену.
+    """
     target_duty = test_duties[0]
     user1, user2 = test_users[:2]
 
@@ -37,6 +40,10 @@ def test_create_swap_people_request(
 def test_accept_swap_duties_request(
     user_client, user_for_client, test_users, test_duties
 ):
+    """
+    Тестирует успешное принятие запроса на замену.
+    Проверяет состояние до и после принятия.
+    """
     target_duty = test_duties[1]
     user1, user2 = user_for_client, test_users[1]
 
@@ -68,6 +75,10 @@ def test_accept_swap_duties_request(
 def test_decline_swap_duties_request(
     user_client, user_for_client, test_users, test_duties
 ):
+    """
+    Тестирует отклонение запроса на замену.
+    Проверяет состояние до и после отклонения.
+    """
     target_duty = test_duties[1]
     user1, user2 = user_for_client, test_users[1]
 
@@ -99,6 +110,10 @@ def test_decline_swap_duties_request(
 def test_cancel_swap_duties_request(
     user_client, user_for_client, test_users, test_duties
 ):
+    """
+    Тестирует отмену запроса на замену.
+    Проверяет состояние до и после отмены.
+    """
     target_duty = test_duties[0]
     user1, user2 = test_users[1], user_for_client
 

@@ -6,6 +6,10 @@ from core.apps.duties.models import SwapPeopleRequest
 
 @pytest.mark.django_db
 def test_swap_people_accept_success(test_duties, test_users):
+    """
+    Тестирует принятие запроса на замену.
+    Проверяет состояние до и после принятия.
+    """
     target_duty = test_duties[0]
     user1, user2 = test_users[:2]
 
@@ -30,6 +34,10 @@ def test_swap_people_accept_success(test_duties, test_users):
 
 @pytest.mark.django_db
 def test_swap_people_decline_success(test_duties, test_users):
+    """
+    Тестирует отклонение запроса на замену.
+    Проверяет состояние до и после отклонения.
+    """
     target_duty = test_duties[0]
     user1, user2 = test_users[:2]
 
@@ -54,6 +62,10 @@ def test_swap_people_decline_success(test_duties, test_users):
 
 @pytest.mark.django_db
 def test_swap_people_on_already_in_duty(test_duties, test_users):
+    """
+    Пользователь пытается заменить себя на человека, который уже присутствует в этом дежурстве.
+    Это вызывает ошибку :DutySwapException:
+    """
     target_duty = test_duties[0]
     user1, user2 = test_users[:2]
     target_duty.people.add(user2)
@@ -72,6 +84,10 @@ def test_swap_people_on_already_in_duty(test_duties, test_users):
 
 @pytest.mark.django_db
 def test_swap_people_on_unowned_duty(test_duties, test_users):
+    """
+    Пользователь создать запрос на замену на дежурстве, в котором его нет.
+    Это вызывает ошибку :DutySwapException:
+    """
     target_duty = test_duties[5]
     user1, user2 = test_users[:2]
 
@@ -89,6 +105,10 @@ def test_swap_people_on_unowned_duty(test_duties, test_users):
 
 @pytest.mark.django_db
 def test_swap_people_self(test_duties, test_users):
+    """
+    Пользователь пытается создать запрос на замену себя на себя.
+    Это вызывает ошибку :DutySwapException:
+    """
     target_duty = test_duties[5]
     user1 = user2 = test_users[0]
 

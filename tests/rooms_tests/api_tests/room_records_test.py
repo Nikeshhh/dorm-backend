@@ -5,6 +5,9 @@ import pytest
 
 @pytest.mark.django_db
 def test_list_room_records(user_client, test_room_records):
+    """
+    Тестирует получение записей книги комнаты.
+    """
     url = reverse("room_records-list")
     response = user_client.get(url)
 

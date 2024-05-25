@@ -1,5 +1,5 @@
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.mixins import ListModelMixin
+from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -10,7 +10,7 @@ from core.api.v1.proposals.serializers import RepairProposalSerializer
 from core.apps.proposals.models import RepairProposal
 
 
-class RepairProposalsViewSet(ListModelMixin, GenericViewSet):
+class RepairProposalsViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
     queryset = RepairProposal.objects.order_by("-created_at")
     serializer_class = RepairProposalSerializer
     authentication_classes = (SessionAuthentication,)

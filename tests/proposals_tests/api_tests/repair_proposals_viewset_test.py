@@ -5,6 +5,9 @@ import pytest
 
 @pytest.mark.django_db
 def test_list(user_client, test_proposals):
+    """
+    Тестирует получение заявок на ремонт, которые принадлежат пользователю.
+    """
     url = reverse("repair-proposals-list")
     response = user_client.get(url)
 
@@ -13,6 +16,9 @@ def test_list(user_client, test_proposals):
 
 @pytest.mark.django_db
 def test_accept(test_proposals, worker_client, test_worker_user):
+    """
+    Тестирует успешное принятие заявки работником.
+    """
     target_proposal = test_proposals[1]
     assert target_proposal.status == 0
     url = reverse("repair-proposals-accept", args=(target_proposal.pk,))
@@ -29,6 +35,9 @@ def test_accept(test_proposals, worker_client, test_worker_user):
 
 @pytest.mark.django_db
 def test_close(test_proposals, worker_client, test_worker_user):
+    """
+    Тестирует успешное закрытие заявки работником.
+    """
     target_proposal = test_proposals[1]
     assert target_proposal.status == 0
     target_proposal.accept(test_worker_user)
@@ -48,6 +57,9 @@ def test_close(test_proposals, worker_client, test_worker_user):
 
 @pytest.mark.django_db
 def test_decline(test_proposals, worker_client, test_worker_user):
+    """
+    Тестирует успешный отказ от заявки работником.
+    """
     target_proposal = test_proposals[1]
     assert target_proposal.status == 0
     target_proposal.accept(test_worker_user)
@@ -67,6 +79,9 @@ def test_decline(test_proposals, worker_client, test_worker_user):
 
 @pytest.mark.django_db
 def test_cancel(user_client, user_for_client, test_proposals, test_worker_user):
+    """
+    Тестирует успешную отмены заявки.
+    """
     target_proposal = user_for_client.repair_proposals.first()
 
     assert target_proposal.author == user_for_client
