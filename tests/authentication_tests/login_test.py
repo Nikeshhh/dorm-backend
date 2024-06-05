@@ -11,6 +11,7 @@ def test_succesfull_login(client, test_user):
     response = client.post(url, data=login_data)
 
     assert response.status_code == HTTP_200_OK, print(response.json())
+    assert response.cookies.get("sessionid").value
 
 
 @pytest.mark.django_db
@@ -21,3 +22,32 @@ def test_failed_login(client, test_user):
     response = client.post(url, data=login_data)
 
     assert response.status_code == HTTP_403_FORBIDDEN, print(response.json())
+
+
+@pytest.mark.django_db
+def test_logout(client, test_user):
+    client.force_login(test_user)
+    url = reverse("authentication-logout")
+    response = client.post(url)
+
+    assert response.status_code == HTTP_200_OK, print(response.json())
+    assert not response.cookies.get("sessionid").value
+
+
+@pytest.mark.django_db
+def test_is_authenticated_false(client, test_user):
+    url = reverse("authentication-is-authenticated")
+    response = client.get(url)
+
+    assert response.status_code == HTTP_200_OK, print(response.json())
+    assert not response.data.get("is_authenticated")
+
+
+@pytest.mark.django_db
+def test_is_authenticated_true(client, test_user):
+    client.force_login(test_user)
+    url = reverse("authentication-is-authenticated")
+    response = client.get(url)
+
+    assert response.status_code == HTTP_200_OK, print(response.json())
+    assert response.data.get("is_authenticated")

@@ -11,7 +11,7 @@ def test_list(user_client, test_proposals):
     url = reverse("repair-proposals-list")
     response = user_client.get(url)
 
-    assert len(response.json()) == 3, print(response.json())
+    assert len(response.json()) == 8, print(response.json())
 
 
 @pytest.mark.django_db
