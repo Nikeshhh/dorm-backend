@@ -16,6 +16,11 @@ UserModel = get_user_model()
 
 
 @pytest.fixture
+def client() -> APIClient:
+    return APIClient()
+
+
+@pytest.fixture
 def test_user() -> CustomUser:
     new_user = UserModel.objects.create(username="bebra")
     new_user.set_password("amogus")

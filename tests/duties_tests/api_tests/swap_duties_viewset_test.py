@@ -184,3 +184,25 @@ def test_cancel_swap_duties_request(
     assert swap_request.accepted is False
     assert swap_request.declined is False
     assert swap_request.canceled is True
+
+
+@pytest.mark.django_db
+def test_get_incoming_requests(client, test_duties):
+    test_duty = test_duties[4]
+    test_user = test_duty.people.first()
+
+    duty_to_swap = test_duties[5]
+    user_to_swap = duty_to_swap.people.first()
+
+    swap_request = SwapDutiesRequest.objects.create(
+        first_user=user_to_swap,
+        first_duty=duty_to_swap,
+        second_user=test_user,
+        second_duty=test_duty,
+    )
+
+    client.force_authenticate(test_user)
+    url = reverse("duty-swaps-get-incoming-requests")
+    response = client.get(url)
+
+    assert response.json()[0].get("pk") == swap_request.pk

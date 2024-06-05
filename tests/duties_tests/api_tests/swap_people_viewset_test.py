@@ -6,7 +6,25 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK
 from core.apps.duties.models import SwapPeopleRequest
 
 
-def test_list(): ...
+@pytest.mark.django_db
+def test_list(client, user_for_client, test_duties):
+    """
+    Тестирует успешное получение списка запросов, отправленных пользователем.
+    """
+    test_duty = test_duties[2]
+    test_user = test_duty.people.first()
+
+    client.force_authenticate(test_user)
+
+    swap_request = SwapPeopleRequest.objects.create(
+        duty=test_duty, current_user=test_user, to_swap=user_for_client
+    )
+
+    url = reverse("people-swaps-list")
+    response = client.get(url)
+
+    assert response.status_code == HTTP_200_OK
+    assert response.json()[0].get("pk") == swap_request.pk, print(response.json())
 
 
 @pytest.mark.django_db
@@ -139,3 +157,24 @@ def test_cancel_swap_duties_request(
     assert swap_request.accepted is False
     assert swap_request.declined is False
     assert swap_request.canceled is True
+
+
+@pytest.mark.django_db
+def test_get_incoming_requests(client, user_for_client, test_duties):  # TODO: implement
+    """
+    Тестирует успешное получение списка запросов, адресованных пользователю.
+    """
+    test_duty = test_duties[2]
+    test_user = test_duty.people.first()
+
+    client.force_authenticate(user_for_client)
+
+    swap_request = SwapPeopleRequest.objects.create(
+        duty=test_duty, current_user=test_user, to_swap=user_for_client
+    )
+
+    url = reverse("people-swaps-get-incoming-requests")
+    response = client.get(url)
+
+    assert response.status_code == HTTP_200_OK
+    assert response.json()[0].get("pk") == swap_request.pk, print(response.json())
