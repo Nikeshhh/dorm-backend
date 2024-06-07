@@ -45,7 +45,7 @@ def test_my_duties(client, test_duties):
 def test_nearest_duty(client, test_duties):
     test_user = test_duties[3].people.first()
     client.force_authenticate(test_user)
-    url = reverse("duty-records-my-duties")
+    url = reverse("duty-records-nearest-duty")
     response = client.get(url)
 
     assert response.status_code == HTTP_200_OK

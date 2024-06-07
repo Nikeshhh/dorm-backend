@@ -6,7 +6,7 @@ from core.apps.duties.models import SwapDutiesRequest, SwapPeopleRequest
 
 
 @pytest.mark.django_db
-def test_list(client, user_for_client, test_duties):  # TODO: implement
+def test_list(client, user_for_client, test_duties):
     """Incoming requests"""
     test_duty = test_duties[6]
     test_user = test_duty.people.first()
@@ -32,5 +32,5 @@ def test_list(client, user_for_client, test_duties):  # TODO: implement
 
     assert response.status_code == HTTP_200_OK
     assert len(response.json()) == 2
-    assert response.json()[0].get("pk") == swap_duties_request.pk
-    assert response.json()[1].get("pk") == swap_people_request.pk
+    assert response.json()[0].get("pk") == swap_people_request.pk
+    assert response.json()[1].get("pk") == swap_duties_request.pk
