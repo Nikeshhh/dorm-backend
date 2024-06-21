@@ -2,6 +2,40 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_403_FO
 from django.urls import reverse
 import pytest
 
+from core.apps.laundry.models import LaundryRecord
+
+
+@pytest.mark.django_db
+def test_today_records_list_create_laundry_records(user_client):
+    """
+    Тестирует автоматическое создание записей при получении.
+    """
+    url = reverse("laundry_records-today-records-list")
+    assert not LaundryRecord.objects.exists()
+    response = user_client.get(url)
+
+    assert response.status_code == HTTP_200_OK
+    assert len(response.json()) > 0
+
+
+@pytest.mark.django_db
+def test_my_records_today(user_client, user_for_client, test_laundry_records):
+    """
+    Тестирует получение записей, принадлежащих пользователю.
+    """
+    test_laundry_records[2].owner = user_for_client
+    test_laundry_records[2].save()
+    test_laundry_records[3].owner = user_for_client
+    test_laundry_records[3].save()
+
+    url = reverse("laundry_records-my-records-today")
+    response = user_client.get(url)
+
+    assert response.status_code == HTTP_200_OK
+    data = response.json()
+    assert len(data) == 2
+    assert data[0]["time_start"] < data[1]["time_start"]
+
 
 @pytest.mark.django_db
 def test_get_records_list(user_client, test_laundry_records):

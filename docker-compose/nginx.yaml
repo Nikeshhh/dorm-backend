@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  dorm-nginx:
+    build: ../nginx
+    container_name: nginx-server
+    ports:
+      - 1337:80
+    volumes:
+      - static_volume:/app/static
+    depends_on:
+      - dorm-backend
+
+volumes:
+  static_volume:

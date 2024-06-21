@@ -5,14 +5,16 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
+      target: production
     container_name: main-app
-    ports:
-      - "${DJANGO_PORT}:8000"
-    command: "sh /entrypoint.sh"
+    expose:
+      - ${DJANGO_PORT}
+    volumes:
+      - static_volume:/app/static
     env_file:
      - ../.env
     depends_on:
-     - postgres
-    volumes:
-      - ..:/app/
+     - postgres_dorm
 
+volumes:
+  static_volume:

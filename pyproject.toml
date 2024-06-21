@@ -12,12 +12,13 @@ django = "^5.0.3"
 django-environ = "^0.11.2"
 djangorestframework = "^3.14.0"
 django-cors-headers = "^4.3.1"
-psycopg2 = "^2.9.9"
 pre-commit = "^3.6.2"
 ruff = "^0.3.1"
 pytest = "^8.0.2"
 pytest-django = "^4.8.0"
 coverage = "^7.5.3"
+gunicorn = "^22.0.0"
+psycopg2-binary = "^2.9.9"
 
 
 [build-system]
