@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta
 from django.contrib import admin
-from django.shortcuts import render
 from django.urls import path
-from django.http import HttpResponse
 
 from core.apps.duties.admin import (
     KitchenDuty,
@@ -12,6 +10,7 @@ from core.apps.duties.admin import (
 )
 from core.apps.laundry.admin import LaundryRecord, LaundryRecordAdmin
 from core.apps.proposals.admin import RepairProposal, RepairProposalAdmin
+from core.apps.reports.services import get_report_file_reponse
 from core.apps.rooms.admin import Room, RoomAdmin, RoomRecord, RoomRecordAdmin
 from core.apps.users.admin import CustomUser, CustomUserAdmin
 
@@ -62,21 +61,16 @@ class MyAdminSite(admin.AdminSite):
             ],
             "date": report_date.strftime("%d.%m.%Y"),
         }
-        document_content = render(
+        response = get_report_file_reponse(
             request=request,
             template_name=self.room_record_report_template,
             context=context,
-        ).content
-        response = HttpResponse(
-            document_content, content_type="application/octet-stream"
-        )
-        response["Content-Disposition"] = (
-            f'attachment; filename="sanitary_violations_report_{report_date.strftime('%d.%m.%Y')}.html"'
+            base_filename="sanitary_violations_report",
+            filename_postfix=f'{report_date.strftime('%d.%m.%Y')}',
         )
         return response
 
     def get_duty_schedule_report(self, request):
-        # TODO: параметризовать
         date_start = datetime.strptime(request.POST.get("week") + "-1", "%Y-W%W-%w")
         date_end = date_start + timedelta(days=7)
         duty_records = KitchenDuty.objects.filter(
@@ -101,16 +95,12 @@ class MyAdminSite(admin.AdminSite):
                 for rec in duty_records
             ],
         }
-        document_content = render(
+        response = get_report_file_reponse(
             request=request,
             template_name=self.duty_schedule_report_template,
             context=context,
-        ).content
-        response = HttpResponse(
-            document_content, content_type="application/octet-stream"
-        )
-        response["Content-Disposition"] = (
-            f'attachment; filename="duty_schedule_report_{date_start.strftime('%d.%m.%Y')}-{date_end.strftime('%d.%m.%Y')}.html"'
+            base_filename="duty_schedule_report",
+            filename_postfix=f'{date_start.strftime('%d.%m.%Y')}-{date_end.strftime('%d.%m.%Y')}',
         )
         return response
 
