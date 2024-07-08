@@ -182,6 +182,7 @@ core/project/settings/local.py
 # Django static folder
 static/*
 !static/.gitkeep
+!static/reports
 
 # Django media folder
 media/*

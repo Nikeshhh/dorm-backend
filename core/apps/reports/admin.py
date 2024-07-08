@@ -1,4 +1,4 @@
-from datetime import timedelta, date
+from datetime import datetime, timedelta
 from django.contrib import admin
 from django.shortcuts import render
 from django.urls import path
@@ -36,11 +36,6 @@ class MyAdminSite(admin.AdminSite):
         urls = super().get_urls()
         custom_urls = [
             path(
-                "generate-document/",
-                self.admin_view(self.generate_document),
-                name="generate-document",
-            ),
-            path(
                 "room-records-report/",
                 self.admin_view(self.get_room_record_report),
                 name="room-records-report",
@@ -53,18 +48,8 @@ class MyAdminSite(admin.AdminSite):
         ]
         return custom_urls + urls
 
-    def generate_document(self, request):
-        # Логика генерации документа
-        document_content = "Это содержимое документа."
-        response = HttpResponse(
-            document_content, content_type="application/octet-stream"
-        )
-        response["Content-Disposition"] = 'attachment; filename="document.txt"'
-        return response
-
     def get_room_record_report(self, request):
-        # TODO: параметризовать
-        report_date = date(year=2024, month=5, day=11)
+        report_date = datetime.strptime(request.POST.get("date"), "%Y-%m-%d")
         records_with_violations = RoomRecord.objects.filter(
             grade__lt=5,
             date__gte=report_date,
@@ -75,7 +60,7 @@ class MyAdminSite(admin.AdminSite):
                 {"room_number": rec.room.number, "comments": rec.comments}
                 for rec in records_with_violations
             ],
-            "date": report_date,
+            "date": report_date.strftime("%d.%m.%Y"),
         }
         document_content = render(
             request=request,
@@ -92,14 +77,14 @@ class MyAdminSite(admin.AdminSite):
 
     def get_duty_schedule_report(self, request):
         # TODO: параметризовать
-        date_start = date(year=2024, month=5, day=23)
-        date_end = date_start + timedelta(days=5)
+        date_start = datetime.strptime(request.POST.get("week") + "-1", "%Y-W%W-%w")
+        date_end = date_start + timedelta(days=7)
         duty_records = KitchenDuty.objects.filter(
             date__gte=date_start, date__lte=date_end
         ).order_by("date")
         context = {
-            "date_start": date_start,
-            "date_end": date_end,
+            "date_start": date_start.strftime("%d.%m.%Y"),
+            "date_end": date_end.strftime("%d.%m.%Y"),
             "result": [
                 {
                     "date": rec.date,

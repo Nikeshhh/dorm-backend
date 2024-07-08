@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week Picker Modal</title>
+    <style>
+        /* Основные стили для модального окна */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgb(0,0,0); 
+            background-color: rgba(0,0,0,0.4); 
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Кнопка для открытия модального окна -->
+<button id="openModalBtn">Выбрать неделю</button>
+
+<!-- Модальное окно -->
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <form id="weekForm">
+            <label for="week">Выберите неделю:</label>
+            <input type="week" id="week" name="week">
+            <button type="submit">Отправить</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Получаем элементы
+var modal = document.getElementById("myModal");
+var btn = document.getElementById("openModalBtn");
+var span = document.getElementsByClassName("close")[0];
+var form = document.getElementById("weekForm");
+
+// Открываем модальное окно при нажатии на кнопку
+btn.onclick = function() {
+    modal.style.display = "block";
+}
+
+// Закрываем модальное окно при нажатии на крестик
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+// Закрываем модальное окно при клике вне его
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+// Обрабатываем отправку формы
+form.onsubmit = function(event) {
+    event.preventDefault(); // Отменяем стандартное поведение формы
+    var weekValue = document.getElementById("week").value;
+    var date = new Date(weekValue + '-1'); // Устанавливаем первый день недели
+    var startDate = new Date(date);
+    var endDate = new Date(date);
+    endDate.setDate(endDate.getDate() + 6); // Устанавливаем последний день недели
+
+    var startDateString = startDate.toISOString().split('T')[0];
+    var endDateString = endDate.toISOString().split('T')[0];
+
+    alert("Дата начала недели: " + startDateString + "\nДата конца недели: " + endDateString);
+    modal.style.display = "none"; // Закрываем модальное окно
+}
+
+</script>
+
+</body>
+</html>
