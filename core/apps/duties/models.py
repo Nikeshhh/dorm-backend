@@ -89,6 +89,10 @@ class SwapDutiesRequest(models.Model):
     declined = models.BooleanField(default=False, verbose_name="Отклонена?")
     canceled = models.BooleanField(default=False, verbose_name="Отменена?")
 
+    class Meta:
+        verbose_name = "Запрос на обмен"
+        verbose_name_plural = "Запросы на обмен"
+
     def accept(self, user: CustomUser):
         if not self.is_mutable:
             raise SwapRequestStatusException

@@ -1,0 +1,15 @@
+{% extends 'admin/index.html' %}
+
+{% block content %}
+  {% if room_record_report_button %}
+    <div class="custom-button" style="margin-bottom: 20px;">
+      <a href="{% url 'admin:room-records-report' %}" class="button">Сформировать отчет о санитарной проверке</a>
+    </div>
+  {% endif %}
+  {% if duty_schedule_report_button %}
+    <div class="custom-button" style="margin-bottom: 20px;">
+      <a href="{% url 'admin:duty-schedule-report' %}" class="button">Сформировать график дежурства</a>
+    </div>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

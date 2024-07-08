@@ -66,7 +66,7 @@ def import_users_from_csv(filename: str):
         today = datetime.today().strftime("%d.%m.%Y")
         with open(filename, "r", encoding="utf-8") as file:
             with open(
-                f"users_output_{today}.csv", "w", encoding="utf-8"
+                f"users_output_{today}.csv", "w", encoding="windows-1251"
             ) as output_file:
                 writer = csv.writer(output_file, delimiter=";")
                 writer.writerow(

@@ -46,6 +46,10 @@ class CustomUser(AbstractBaseUser):
         fio = f"{self.surname} {self.name} {self.second_name}"
         return fio if fio.strip() else self.username
 
+    @property
+    def short_name(self) -> str:
+        return f"{self.surname} {self.name[0]}. {self.second_name[0]}."
+
     def has_perm(self, perm, obj=None):
         return True
 

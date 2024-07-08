@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты санитарной проверки</title>
+    <style>
+        body {
+            margin: 100px 300px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14pt;
+            text-align: center;
+        }
+        th {
+            font-weight: bold;
+            text-align: center;
+            padding: 8px;
+            border: 1px solid #000;
+        }
+        td {
+            padding: 8px;
+            border: 1px solid #000;
+        }
+        .header, .text {
+            text-align: center;
+            font-size: 14pt;
+        }
+    </style>
+</head>
+<body>
+    <p class="header">ОТЧЕТ</p>
+    {% if not result %}
+    <p class="text">В ходе санитарной проверки от {{ date }} не было обнаружено нарушений санитарного порядка</p>
+    {% else %}
+    <p class="text">О нарушениях, выявленных в ходе санитарной проверки от {{ date }}</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Номер комнаты</th>
+                <th>Описание нарушения</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in result %}
+            <tr>
+                <td>{{ record.room_number }}</td>
+                <td>{{ record.comments }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</body>
+</html>

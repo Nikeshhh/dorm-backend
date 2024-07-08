@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>График дежурства</title>
+    <style>
+        body {
+            margin: 100px 300px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14pt;
+            text-align: center;
+        }
+        th {
+            font-weight: bold;
+            text-align: center;
+            padding: 8px;
+            border: 1px solid #000;
+        }
+        td {
+            padding: 8px;
+            border: 1px solid #000;
+        }
+        .header, .text {
+            text-align: center;
+            font-size: 14pt;
+        }
+        .header {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <p class="header">ГРАФИК ДЕЖУРСТВА</p>
+    <p class="text">На неделю с {{ date_start }} по {{ date_end }}</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Время</th>
+                <th>ФИО</th>
+                <th>Комната</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in result %}
+            <tr>
+                <td rowspan="{{ record.people_amount }}">{{ record.day }} <p style="margin: 0px;">{{ record.date }}</p></td>
+                <td rowspan="{{ record.people_amount }}">
+                    {{ record.time }}
+                </td>
+            </tr>
+            {% for pupil in record.people %}
+            <tr>
+                <td>{{ pupil.name }}</td>
+                <td>{{ pupil.room_number }}</td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -43,7 +43,7 @@ class RepairProposal(models.Model):
         verbose_name_plural = "Заявки на ремонт"
 
     def __str__(self) -> str:
-        return f"Заявка номер {self.pk}. Статус: {self.get_status_display()}"
+        return f"Заявка номер {self.pk}."
 
     def cancel(self, author: CustomUser):
         # Недоступна для заявок со статусом "Выполнена" (2)
