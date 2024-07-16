@@ -25,6 +25,10 @@ POSTGRES_PASSWORD=qwerty - пароль пользователя БД
 POSTGRES_HOST=db - хост БД
 POSTGRES_PORT=5432 - порт БД (при запуске в локале изменить)
 DJANGO_PORT=8000 - порт приложения
+RABBIT_HOST=rabbitmq - хост Rabbitmq
+RABBIT_PORT=5672 - порт Rabbitmq
+RABBITMQ_DEFAULT_USER=rabbitmq - логин пользователя Rabbitmq
+RABBITMQ_DEFAULT_PASS=asdfgh - пароль пользователя Rabbitmq
 ```
 
 Установить прекоммиты
@@ -37,12 +41,7 @@ pre-commit install
 docker compose -f .\docker-compose\storages.yaml --env-file .env  up --build -d
 ```
 
-Запустить приложение внутри контейнера
-```
-docker compose -f .\docker-compose\app.yaml --env-file .env  up --build -d
-```
-
-Запустутить production сервер
+Запустутить приложение целиком
 ```
 docker compose -f .\docker-compose\storages.yaml -f .\docker-compose\app.yaml -f .\docker-compose\nginx.yaml  --env-file .env  up --build
 ```

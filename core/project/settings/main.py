@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from celery.schedules import crontab
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -50,6 +51,8 @@ INSTALLED_APPS = [
     # Third party apps
     "rest_framework",
     "corsheaders",
+    "django_celery_beat",
+    "django_celery_results",
 ]
 
 MIDDLEWARE = [
@@ -134,9 +137,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "static/"
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+# STATICFILES_DIRS = [
+#     BASE_DIR / "static",
+# ]
+STATIC_ROOT = BASE_DIR / "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -155,6 +159,7 @@ SESSION_COOKIE_HTTPONLY = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:1337",
     "http://127.0.0.1:5173",
     "http://192.168.3.14:5173",
     "http://192.168.43.105:5173",
@@ -165,6 +170,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:1337",
     "http://127.0.0.1:5173",
     "http://192.168.3.14:5173",
     "http://192.168.43.105:5173",
@@ -174,3 +180,15 @@ CSRF_COOKIE_NAME = "csrftoken"
 # Auth settings
 
 AUTH_USER_MODEL = "users.CustomUser"
+
+# Celery settings
+
+CELERY_BROKER_URL = f"amqp://{env("RABBITMQ_DEFAULT_USER")}:{env("RABBITMQ_DEFAULT_PASS")}@{env("RABBIT_HOST")}:{env("RABBIT_PORT")}/"
+CELERY_RESULT_BACKEND = "django-db"
+
+CELERY_BEAT_SCHEDULE = {
+    "generate_duty_schedule": {
+        "task": "core.apps.reports.tasks.create_duty_schedule",
+        "schedule": crontab(minute=0, hour=4, day_of_week=1),
+    },
+}

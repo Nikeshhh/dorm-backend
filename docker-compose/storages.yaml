@@ -10,6 +10,13 @@ services:
       - dorm_postgres_data:/var/lib/postgresql/data
     env_file:
       - ../.env
+  rabbitmq_dorm:
+    image: rabbitmq:latest
+    container_name: rabbitmq
+    ports:
+      - "${RABBIT_PORT}:5672"
+    env_file:
+      - ../.env
 
 volumes:
   dorm_postgres_data:

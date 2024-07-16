@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  dorm-backend:
+  dorm_backend:
     build:
       context: ..
       dockerfile: Dockerfile
@@ -15,6 +15,30 @@ services:
      - ../.env
     depends_on:
      - postgres_dorm
+     - rabbitmq_dorm
+  celery_beat:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: celery
+    container_name: celery-beat-app
+    command: celery -A core.project.celery.app beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file:
+      - ../.env
+    depends_on:
+      - dorm_backend
+  celery_worker:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: celery
+    container_name: celery-worker-app
+    command: celery -A core.project.celery.app worker -l info
+    env_file:
+      - ../.env
+    depends_on:
+      - dorm_backend
+
 
 volumes:
   static_volume:

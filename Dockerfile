@@ -38,8 +38,21 @@ COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 COPY ./core /app/core
+COPY ./templates /app/templates
+COPY ./static /app/static
 COPY ./manage.py /app/
 WORKDIR /app
 
 CMD ["sh", "../entrypoint.sh"]
 
+
+# build celery image
+FROM python-base as celery
+
+COPY --from=builder $VENV_PATH $VENV_PATH
+
+COPY ./core /app/core
+COPY ./templates /app/templates
+COPY ./static /app/static
+COPY ./manage.py /app/
+WORKDIR /app

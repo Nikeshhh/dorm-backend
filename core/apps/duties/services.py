@@ -2,12 +2,13 @@ from datetime import date
 from itertools import cycle
 
 from django.db.models import Count, Q
+from django.db.transaction import atomic
 
 from core.apps.common.exceptions import NotConfiguredException
 from core.apps.common.services import get_current_year_dates
 from core.apps.common.utils import date_range
 from core.apps.duties.models import KitchenDuty, KitchenDutyConfig
-from tests.conftest import UserModel
+from core.apps.users.models import CustomUser as UserModel
 
 
 def generate_duty_schedule(date_start: date, date_end: date) -> list[KitchenDuty]:
@@ -31,10 +32,14 @@ def generate_duty_schedule(date_start: date, date_end: date) -> list[KitchenDuty
         .order_by("finished_duties_this_year", "room__number")
     )
 
-    for day in date_range(date_start, date_end):
-        duty_item = KitchenDuty.objects.create(date=day)
+    with atomic():
+        print("Starting schedule creation")
+        for day in date_range(date_start, date_end):
+            duty_item = KitchenDuty.objects.create(date=day)
 
-        for _ in range(config.people_per_day):
-            duty_item.people.add(next(people))
+            for _ in range(config.people_per_day):
+                duty_item.people.add(next(people))
 
-        duty_item.save()
+            duty_item.save()
+
+    print("Schedule successfully created")

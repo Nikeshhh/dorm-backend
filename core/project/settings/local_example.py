@@ -5,4 +5,4 @@ from core.project.settings.main import *  # noqa
 DEBUG = True
 
 # For local database
-DATABASES["default"]["HOST"] = "localhost"  # noqa
+# DATABASES["default"]["HOST"] = "localhost"  # noqa

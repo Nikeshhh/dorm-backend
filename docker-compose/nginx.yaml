@@ -9,7 +9,7 @@ services:
     volumes:
       - static_volume:/app/static
     depends_on:
-      - dorm-backend
+      - dorm_backend
 
 volumes:
   static_volume:
