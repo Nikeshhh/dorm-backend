@@ -34,15 +34,26 @@ class RoomRecordsViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 
     @extend_schema(tags=["Rooms"])
     def list(self, request, *args, **kwargs):
+        """Список всех записей комнаты пользователя."""
         return super().list(request, *args, **kwargs)
 
     @extend_schema(tags=["Rooms"])
     def retrieve(self, request, *args, **kwargs):
+        """
+        Получить запись по ID.
+        Получить можно только запись, принадлежащую к комнате пользователя.
+        Иначе выбрасывает 404.
+
+        :param id: ID записи.
+        """
         return super().retrieve(request, *args, **kwargs)
 
     @extend_schema(tags=["Rooms"])
     @action(methods=("GET",), detail=False)
     def my_last_room_record(self, request, *args, **kwargs):
+        """
+        Получить последнюю запись комнаты пользователя.
+        """
         last_record = self.get_queryset().first()
 
         serializer = self.get_serializer(last_record)
@@ -95,8 +106,14 @@ class CreateRoomRecordsViewSet(
     @extend_schema(tags=["Rooms"])
     @action(methods=("GET",), detail=False)
     def today_created(self, request, *args, **kwargs):
+        """
+        Получить записи, созданные сегодня.
+        """
         return super().list(request, *args, **kwargs)
 
     @extend_schema(tags=["Rooms"])
     def list(self, request, *args, **kwargs):
+        """
+        Получить список комнат.
+        """
         return super().list(request, *args, **kwargs)

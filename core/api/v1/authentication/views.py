@@ -16,6 +16,7 @@ class AuthenticationViewSet(GenericViewSet):
     @extend_schema(tags=["Authentication"])
     @action(methods=("POST",), detail=False)
     def login(self, request, *args, **kwargs):
+        """Аутентифицирует пользователя."""
         serializer = self.get_serializer(request.data)
 
         user = authenticate(**serializer.data)
@@ -30,12 +31,14 @@ class AuthenticationViewSet(GenericViewSet):
     @extend_schema(tags=["Authentication"])
     @action(methods=("POST",), detail=False)
     def logout(self, request, *args, **kwargs):
+        """Удаляет authentication credentials из текущего запроса."""
         logout(request)
         return Response({"data": "Успешный выход из аккаунта"}, HTTP_200_OK)
 
     @extend_schema(tags=["Authentication"])
     @action(methods=("GET",), detail=False)
     def is_authenticated(self, request, *args, **kwargs):
+        """Возвращает true, если пользователь авторизован, иначе false."""
         return Response(
             {"is_authenticated": not isinstance(request.user, AnonymousUser)}
         )
