@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.authentication import SessionAuthentication
 
+from drf_spectacular.utils import extend_schema
+
 from core.api.v1.users.serializers import ResidentSerializer, UserSerializer
 from core.apps.users.models import CustomUser
 
@@ -30,12 +32,14 @@ class UsersViewSet(GenericViewSet):
             )
         return queryset
 
+    @extend_schema(tags=["Users"])
     @action(methods=("GET",), detail=False)
     def me(self, request, *args, **kwargs):
         serializer = self.get_serializer(request.user)
 
         return Response(serializer.data, HTTP_200_OK)
 
+    @extend_schema(tags=["Users"])
     @action(methods=("GET",), detail=False)
     def list_residents(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_queryset(), many=True)

@@ -8,6 +8,7 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK
 
 from datetime import datetime, timedelta
 from django.db.models import Q
+from drf_spectacular.utils import extend_schema
 
 from core.api.v1.duties.serializers import (
     CreateSwapDutiesRequestSerializer,
@@ -37,6 +38,7 @@ class DutyRecordsViewSet(ListModelMixin, GenericViewSet):
             queryset = queryset.filter(people=self.request.user)[:1]
         return queryset
 
+    @extend_schema(tags=["DutyRecords"])
     @action(methods=("GET",), detail=True)
     def duties_to_swap(self, request, pk, *args, **kwargs):
         current = self.get_object()
@@ -50,12 +52,18 @@ class DutyRecordsViewSet(ListModelMixin, GenericViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    @extend_schema(tags=["DutyRecords"])
     @action(methods=("GET",), detail=False)
     def my_duties(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @extend_schema(tags=["DutyRecords"])
     @action(methods=("GET",), detail=False)
     def nearest_duty(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(tags=["DutyRecords"])
+    def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
 
@@ -67,6 +75,7 @@ class SwapRequestsViewSet(ListModelMixin, GenericViewSet):
     def get_serializer(self, serializer_class, *args, **kwargs):
         return serializer_class(*args, **kwargs)
 
+    @extend_schema(tags=["SwapRequests"])
     def list(self, request, *args, **kwargs):
         swap_people_queryset = SwapPeopleRequest.objects.filter(
             to_swap=request.user
@@ -110,10 +119,12 @@ class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
             return self.queryset.filter(second_user=self.request.user)
         return self.queryset
 
+    @extend_schema(tags=["SwapDuties"])
     @action(methods=("GET",), detail=False)
     def get_incoming_requests(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @extend_schema(tags=["SwapDuties"])
     @action(methods=("POST",), detail=True)
     def accept_swap_duties_request(self, request, pk, *args, **kwargs):
         swap_request: SwapDutiesRequest = self.get_object()
@@ -122,6 +133,7 @@ class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)
 
+    @extend_schema(tags=["SwapDuties"])
     @action(methods=("POST",), detail=True)
     def decline_swap_duties_request(self, request, pk, *args, **kwargs):
         swap_request: SwapDutiesRequest = self.get_object()
@@ -130,6 +142,7 @@ class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)
 
+    @extend_schema(tags=["SwapDuties"])
     @action(methods=("POST",), detail=True)
     def cancel_swap_duties_request(self, request, pk, *args, **kwargs):
         swap_request: SwapDutiesRequest = self.get_object()
@@ -138,6 +151,7 @@ class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)
 
+    @extend_schema(tags=["SwapDuties"])
     @action(methods=("POST",), detail=False)
     def create_swap_duties_request(self, request, *args, **kwargs):
         initiator = request.user
@@ -156,6 +170,10 @@ class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
 
         serializer = SwapDutiesRequestSerializer(swap_request)
         return Response(serializer.data, status=HTTP_201_CREATED)
+
+    @extend_schema(tags=["SwapDuties"])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
@@ -179,10 +197,12 @@ class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
             return self.queryset.filter(to_swap=self.request.user)
         return self.queryset
 
+    @extend_schema(tags=["SwapPeople"])
     @action(methods=("GET",), detail=False)
     def get_incoming_requests(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @extend_schema(tags=["SwapPeople"])
     @action(methods=("POST",), detail=True)
     def accept_swap_people_request(self, request, pk, *args, **kwargs):
         swap_request: SwapPeopleRequest = self.get_object()
@@ -191,6 +211,7 @@ class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)
 
+    @extend_schema(tags=["SwapPeople"])
     @action(methods=("POST",), detail=True)
     def decline_swap_people_request(self, request, pk, *args, **kwargs):
         swap_request: SwapPeopleRequest = self.get_object()
@@ -199,6 +220,7 @@ class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)
 
+    @extend_schema(tags=["SwapPeople"])
     @action(methods=("POST",), detail=True)
     def cancel_swap_people_request(self, request, pk, *args, **kwargs):
         swap_request: SwapPeopleRequest = self.get_object()
@@ -207,6 +229,7 @@ class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)
 
+    @extend_schema(tags=["SwapPeople"])
     @action(methods=("POST",), detail=False)
     def create_swap_people_request(self, request, *args, **kwargs):
         initiator = request.user
@@ -221,3 +244,7 @@ class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
 
         serializer = self.serializer_class(swap_request)
         return Response(serializer.data, status=HTTP_201_CREATED)
+
+    @extend_schema(tags=["SwapPeople"])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)

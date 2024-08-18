@@ -19,6 +19,8 @@ from core.api.v1.rooms.serializers import (
 )
 from core.apps.rooms.models import Room, RoomRecord
 
+from drf_spectacular.utils import extend_schema
+
 from django.utils import timezone
 
 
@@ -30,9 +32,15 @@ class RoomRecordsViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     def get_queryset(self):
         return self.queryset.filter(room=self.request.user.room)
 
+    @extend_schema(tags=["Rooms"])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @extend_schema(tags=["Rooms"])
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @extend_schema(tags=["Rooms"])
     @action(methods=("GET",), detail=False)
     def my_last_room_record(self, request, *args, **kwargs):
         last_record = self.get_queryset().first()
@@ -72,15 +80,23 @@ class CreateRoomRecordsViewSet(
             return Room.objects.order_by("-number")
         return super().get_queryset()
 
+    @extend_schema(tags=["Rooms"])
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
+    @extend_schema(tags=["Rooms"])
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
 
+    @extend_schema(tags=["Rooms"])
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
+    @extend_schema(tags=["Rooms"])
     @action(methods=("GET",), detail=False)
     def today_created(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(tags=["Rooms"])
+    def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
