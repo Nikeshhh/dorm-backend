@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_celery_beat",
     "django_celery_results",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -191,4 +192,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "core.apps.reports.tasks.create_duty_schedule",
         "schedule": crontab(minute=0, hour=4, day_of_week=1),
     },
+}
+
+# REST framework settings
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
