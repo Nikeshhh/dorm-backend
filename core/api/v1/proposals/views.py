@@ -77,10 +77,10 @@ class RepairProposalsViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
 
     @extend_schema(tags=["RepairProposals"])
     def list(self, request, *args, **kwargs):
-        """Список всех заявок на ремонт."""
+        """Получить список всех заявок на ремонт."""
         return super().list(request, *args, **kwargs)
 
     @extend_schema(tags=["RepairProposals"])
     def create(self, request, *args, **kwargs):
-        """Создание заявки на ремонт."""
+        """Создать заявку на ремонт."""
         return super().create(request, *args, **kwargs)

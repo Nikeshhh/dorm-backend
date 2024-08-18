@@ -33,7 +33,8 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
     def today_records_list(self, request, *args, **kwargs):
         """
         Получить список записей на сегодняшний день.
-        При отсуствии записей, происходит создание новых на сегодня.
+
+        :side effect: При отсуствии записей, происходит создание новых на сегодня.
         """
         if not self.filter_queryset(self.get_queryset()):
             create_laundry_records_for_today()
@@ -98,6 +99,7 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
     def today_records_stats(self, request, *args, **kwargs):
         """
         Получить статистику записей на сегодняшний день.
+
         Возвращает строку, которая сообщает количество свободных записей,
         или сообщение об отсуствии свободных записей.
         """

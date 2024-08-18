@@ -41,9 +41,7 @@ class DutyRecordsViewSet(ListModelMixin, GenericViewSet):
     @extend_schema(tags=["DutyRecords"])
     @action(methods=("GET",), detail=True)
     def duties_to_swap(self, request, pk, *args, **kwargs):
-        """
-        Получить список дежурств, доступных для обмена.
-        """
+        """Получить список дежурств, доступных для обмена."""
         current = self.get_object()
         queryset = self.get_queryset().exclude(pk=current.pk)
 
@@ -83,10 +81,7 @@ class SwapRequestsViewSet(ListModelMixin, GenericViewSet):
 
     @extend_schema(tags=["SwapRequests"])
     def list(self, request, *args, **kwargs):
-        """
-        Получить список всех запросов на обмен и на замену.
-        Возвращает оба вида запросов.
-        """
+        """Получить список всех запросов на обмен и на замену."""
         swap_people_queryset = SwapPeopleRequest.objects.filter(
             to_swap=request.user
         ).order_by("-created_at")
@@ -184,7 +179,7 @@ class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
     @action(methods=("POST",), detail=False)
     def create_swap_duties_request(self, request, *args, **kwargs):
         """
-        Создает запрос на обмен дежурствами.
+        Создать запрос на обмен дежурствами.
 
         :raises RoleViolationException: Если текущий пользователь не является проживающим.
         :raises DutySwapException: Если дежурства идентичны.
@@ -209,7 +204,7 @@ class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
 
     @extend_schema(tags=["SwapDuties"])
     def list(self, request, *args, **kwargs):
-        """Возвращает список всех запросов на обмен дежурствами."""
+        """Получить список всех запросов на обмен дежурствами."""
         return super().list(request, *args, **kwargs)
 
 
@@ -237,14 +232,14 @@ class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
     @extend_schema(tags=["SwapPeople"])
     @action(methods=("GET",), detail=False)
     def get_incoming_requests(self, request, *args, **kwargs):
-        """Возвращает список входящих запросов на замену для текущего пользователя."""
+        """Получить список входящих запросов на замену для текущего пользователя."""
         return super().list(request, *args, **kwargs)
 
     @extend_schema(tags=["SwapPeople"])
     @action(methods=("POST",), detail=True)
     def accept_swap_people_request(self, request, pk, *args, **kwargs):
         """
-        Принимает запрос на замену.
+        Принять запрос на замену.
 
         :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
         :raises DutySwapException: Если заявка не направлена текущему пользователю.
@@ -259,7 +254,7 @@ class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
     @action(methods=("POST",), detail=True)
     def decline_swap_people_request(self, request, pk, *args, **kwargs):
         """
-        Отколняет запрос на замену.
+        Отклонить запрос на замену.
 
         :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
         :raises DutySwapException: Если заявка не направлена текущему пользователю.
@@ -274,7 +269,7 @@ class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
     @action(methods=("POST",), detail=True)
     def cancel_swap_people_request(self, request, pk, *args, **kwargs):
         """
-        Отменяет запрос на замену.
+        Отменить запрос на замену.
 
         :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
         :raises DutySwapException: Если заявка не направлена текущему пользователю.
@@ -289,7 +284,7 @@ class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
     @action(methods=("POST",), detail=False)
     def create_swap_people_request(self, request, *args, **kwargs):
         """
-        Создает запрос на замену.
+        Создать запрос на замену.
 
         :raises RoleViolationException: Если текущий пользователь не является проижвающим.
         :raises DutySwapException: Если текущий пользователь не принадлежит к текущему дежурству.

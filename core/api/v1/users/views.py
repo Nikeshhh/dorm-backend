@@ -35,6 +35,7 @@ class UsersViewSet(GenericViewSet):
     @extend_schema(tags=["Users"])
     @action(methods=("GET",), detail=False)
     def me(self, request, *args, **kwargs):
+        """Получить данные текущего пользователя."""
         serializer = self.get_serializer(request.user)
 
         return Response(serializer.data, HTTP_200_OK)
@@ -42,6 +43,11 @@ class UsersViewSet(GenericViewSet):
     @extend_schema(tags=["Users"])
     @action(methods=("GET",), detail=False)
     def list_residents(self, request, *args, **kwargs):
+        """
+        Получить список всех жильцов в общежитии.
+
+        Список отсортирован по номеру комнаты.
+        """
         serializer = self.get_serializer(self.get_queryset(), many=True)
 
         return Response(serializer.data, HTTP_200_OK)
