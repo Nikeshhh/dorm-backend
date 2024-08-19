@@ -18,19 +18,23 @@ class RepairProposalsViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get_serializer_class(self):
-        return super().get_serializer_class()
-
-    def get_serializer(self, *args, **kwargs):
-        return super().get_serializer(*args, **kwargs)
-
     def get_queryset(self):
         if self.action == "my_proposals":
             return self.queryset.filter(author=self.request.user)
         return super().get_queryset()
 
     @extend_schema(tags=["RepairProposals"])
-    @action(methods=("GET",), detail=False)
+    def list(self, request, *args, **kwargs):
+        """Получить список всех заявок на ремонт."""
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(tags=["RepairProposals"])
+    def create(self, request, *args, **kwargs):
+        """Создать заявку на ремонт."""
+        return super().create(request, *args, **kwargs)
+
+    @extend_schema(tags=["RepairProposals"])
+    @action(methods=("GET",), detail=False, url_path="my")
     def my_proposals(self, request, *args, **kwargs):
         """Получить заявки текущего пользователя."""
         return super().list(request, *args, **kwargs)
@@ -74,13 +78,3 @@ class RepairProposalsViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
 
         serializer = self.get_serializer(proposal)
         return Response(serializer.data, status=HTTP_200_OK)
-
-    @extend_schema(tags=["RepairProposals"])
-    def list(self, request, *args, **kwargs):
-        """Получить список всех заявок на ремонт."""
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(tags=["RepairProposals"])
-    def create(self, request, *args, **kwargs):
-        """Создать заявку на ремонт."""
-        return super().create(request, *args, **kwargs)

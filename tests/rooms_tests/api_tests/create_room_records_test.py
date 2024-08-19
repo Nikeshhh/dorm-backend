@@ -13,7 +13,7 @@ def test_create_new_record(admin_client, admin_user, test_room):
     """
     Тестирует успешное создание новой записи в книге комнаты.
     """
-    url = reverse("create_room_records-list")
+    url = reverse("room_records-list")
     new_record_data = {"grade": 5, "comments": "Круто", "room_pk": test_room.pk}
     response = admin_client.post(url, new_record_data)
 
@@ -29,7 +29,7 @@ def test_update_record(admin_client, admin_user, test_room_records, test_room):
     Тестирует успешное редактирование записи через patch.
     """
     record_to_test = test_room_records[0]
-    url = reverse("create_room_records-detail", args=(record_to_test.pk,))
+    url = reverse("room_records-detail", args=(record_to_test.pk,))
     patch_data = {
         "grade": 5,
         "comments": "Все норм",
@@ -51,7 +51,7 @@ def test_create_new_record_validation_error(admin_client, test_room):
     """
     Тестирует ошибку при валидации оценки.
     """
-    url = reverse("create_room_records-list")
+    url = reverse("room_records-list")
     new_record_data = {"grade": 6, "comments": "Круто", "room_pk": test_room.pk}
     response = admin_client.post(url, new_record_data)
 
@@ -63,7 +63,7 @@ def test_create_new_record_room_not_found(admin_client):
     """
     Тестирует попытку создания записи для несуществующей комнаты.
     """
-    url = reverse("create_room_records-list")
+    url = reverse("room_records-list")
     new_record_data = {"grade": 4, "comments": "Круто", "room_pk": 123}
     response = admin_client.post(url, new_record_data)
 

@@ -1,5 +1,5 @@
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.mixins import ListModelMixin
+from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import action
@@ -39,7 +39,12 @@ class DutyRecordsViewSet(ListModelMixin, GenericViewSet):
         return queryset
 
     @extend_schema(tags=["DutyRecords"])
-    @action(methods=("GET",), detail=True)
+    def list(self, request, *args, **kwargs):
+        """Получить список всех дежурств."""
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(tags=["DutyRecords"])
+    @action(methods=("GET",), detail=True, url_path="to-swap")
     def duties_to_swap(self, request, pk, *args, **kwargs):
         """Получить список дежурств, доступных для обмена."""
         current = self.get_object()
@@ -54,20 +59,15 @@ class DutyRecordsViewSet(ListModelMixin, GenericViewSet):
         return Response(serializer.data)
 
     @extend_schema(tags=["DutyRecords"])
-    @action(methods=("GET",), detail=False)
+    @action(methods=("GET",), detail=False, url_path="my")
     def my_duties(self, request, *args, **kwargs):
         """Получить список всех дежурств текущего пользователя."""
         return super().list(request, *args, **kwargs)
 
     @extend_schema(tags=["DutyRecords"])
-    @action(methods=("GET",), detail=False)
+    @action(methods=("GET",), detail=False, url_path="nearest")
     def nearest_duty(self, request, *args, **kwargs):
         """Получить ближайшее дежурство текущего пользователя."""
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(tags=["DutyRecords"])
-    def list(self, request, *args, **kwargs):
-        """Получить список всех дежурств."""
         return super().list(request, *args, **kwargs)
 
 
@@ -103,19 +103,16 @@ class SwapRequestsViewSet(ListModelMixin, GenericViewSet):
         return Response(data)
 
 
-class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
+class SwapDutiesViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
     queryset = SwapDutiesRequest.objects.order_by("-created_at")
     serializer_class = SwapDutiesRequestSerializer
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
-        if self.action == "create_swap_duties_request":
+        if self.action == "create":
             return CreateSwapDutiesRequestSerializer
         return super().get_serializer_class()
-
-    def get_serializer(self, *args, **kwargs):
-        return super().get_serializer(*args, **kwargs)
 
     def get_queryset(self):
         if self.action == "list":
@@ -125,59 +122,7 @@ class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
         return self.queryset
 
     @extend_schema(tags=["SwapDuties"])
-    @action(methods=("GET",), detail=False)
-    def get_incoming_requests(self, request, *args, **kwargs):
-        """Получить входящие запросы на обмен дежурствами для текущего пользователя."""
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(tags=["SwapDuties"])
-    @action(methods=("POST",), detail=True)
-    def accept_swap_duties_request(self, request, pk, *args, **kwargs):
-        """
-        Принять запрос на обмен дежурствами.
-
-        :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
-        :raises DutySwapException: Если запрос не направлен текущему пользователю.
-        """
-        swap_request: SwapDutiesRequest = self.get_object()
-        swap_request.accept(request.user)
-
-        serializer = self.get_serializer(swap_request)
-        return Response(serializer.data, status=HTTP_200_OK)
-
-    @extend_schema(tags=["SwapDuties"])
-    @action(methods=("POST",), detail=True)
-    def decline_swap_duties_request(self, request, pk, *args, **kwargs):
-        """
-        Отклонить запрос на обмен дежурствами.
-
-        :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
-        :raises DutySwapException: Если запрос не направлен текущему пользователю.
-        """
-        swap_request: SwapDutiesRequest = self.get_object()
-        swap_request.decline(request.user)
-
-        serializer = self.get_serializer(swap_request)
-        return Response(serializer.data, status=HTTP_200_OK)
-
-    @extend_schema(tags=["SwapDuties"])
-    @action(methods=("POST",), detail=True)
-    def cancel_swap_duties_request(self, request, pk, *args, **kwargs):
-        """
-        Отменить исходящий запрос на обмен дежурствами.
-
-        :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
-        :raises DutySwapException: Если пользователь не имеет доступа к этому действию.
-        """
-        swap_request: SwapDutiesRequest = self.get_object()
-        swap_request.cancel(request.user)
-
-        serializer = self.get_serializer(swap_request)
-        return Response(serializer.data, status=HTTP_200_OK)
-
-    @extend_schema(tags=["SwapDuties"])
-    @action(methods=("POST",), detail=False)
-    def create_swap_duties_request(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         """
         Создать запрос на обмен дежурствами.
 
@@ -207,15 +152,66 @@ class SwapDutiesViewSet(ListModelMixin, GenericViewSet):
         """Получить список всех запросов на обмен дежурствами."""
         return super().list(request, *args, **kwargs)
 
+    @extend_schema(tags=["SwapDuties"])
+    @action(methods=("GET",), detail=False, url_path="incoming")
+    def get_incoming_requests(self, request, *args, **kwargs):
+        """Получить входящие запросы на обмен дежурствами для текущего пользователя."""
+        return super().list(request, *args, **kwargs)
 
-class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
+    @extend_schema(tags=["SwapDuties"])
+    @action(methods=("POST",), detail=True, url_path="accept")
+    def accept_swap_duties_request(self, request, pk, *args, **kwargs):
+        """
+        Принять запрос на обмен дежурствами.
+
+        :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
+        :raises DutySwapException: Если запрос не направлен текущему пользователю.
+        """
+        swap_request: SwapDutiesRequest = self.get_object()
+        swap_request.accept(request.user)
+
+        serializer = self.get_serializer(swap_request)
+        return Response(serializer.data, status=HTTP_200_OK)
+
+    @extend_schema(tags=["SwapDuties"])
+    @action(methods=("POST",), detail=True, url_path="decline")
+    def decline_swap_duties_request(self, request, pk, *args, **kwargs):
+        """
+        Отклонить запрос на обмен дежурствами.
+
+        :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
+        :raises DutySwapException: Если запрос не направлен текущему пользователю.
+        """
+        swap_request: SwapDutiesRequest = self.get_object()
+        swap_request.decline(request.user)
+
+        serializer = self.get_serializer(swap_request)
+        return Response(serializer.data, status=HTTP_200_OK)
+
+    @extend_schema(tags=["SwapDuties"])
+    @action(methods=("POST",), detail=True, url_path="cancel")
+    def cancel_swap_duties_request(self, request, pk, *args, **kwargs):
+        """
+        Отменить исходящий запрос на обмен дежурствами.
+
+        :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
+        :raises DutySwapException: Если пользователь не имеет доступа к этому действию.
+        """
+        swap_request: SwapDutiesRequest = self.get_object()
+        swap_request.cancel(request.user)
+
+        serializer = self.get_serializer(swap_request)
+        return Response(serializer.data, status=HTTP_200_OK)
+
+
+class SwapPeopleViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
     queryset = SwapPeopleRequest.objects.order_by("-created_at")
     serializer_class = SwapPeopleRequestSerializer
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
-        if self.action == "create_swap_people_request":
+        if self.action == "create":
             return CreateSwapPeopleRequestSerializer
         return super().get_serializer_class()
 
@@ -230,59 +226,7 @@ class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
         return self.queryset
 
     @extend_schema(tags=["SwapPeople"])
-    @action(methods=("GET",), detail=False)
-    def get_incoming_requests(self, request, *args, **kwargs):
-        """Получить список входящих запросов на замену для текущего пользователя."""
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(tags=["SwapPeople"])
-    @action(methods=("POST",), detail=True)
-    def accept_swap_people_request(self, request, pk, *args, **kwargs):
-        """
-        Принять запрос на замену.
-
-        :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
-        :raises DutySwapException: Если заявка не направлена текущему пользователю.
-        """
-        swap_request: SwapPeopleRequest = self.get_object()
-        swap_request.accept(request.user)
-
-        serializer = self.get_serializer(swap_request)
-        return Response(serializer.data, status=HTTP_200_OK)
-
-    @extend_schema(tags=["SwapPeople"])
-    @action(methods=("POST",), detail=True)
-    def decline_swap_people_request(self, request, pk, *args, **kwargs):
-        """
-        Отклонить запрос на замену.
-
-        :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
-        :raises DutySwapException: Если заявка не направлена текущему пользователю.
-        """
-        swap_request: SwapPeopleRequest = self.get_object()
-        swap_request.decline(request.user)
-
-        serializer = self.get_serializer(swap_request)
-        return Response(serializer.data, status=HTTP_200_OK)
-
-    @extend_schema(tags=["SwapPeople"])
-    @action(methods=("POST",), detail=True)
-    def cancel_swap_people_request(self, request, pk, *args, **kwargs):
-        """
-        Отменить запрос на замену.
-
-        :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
-        :raises DutySwapException: Если заявка не направлена текущему пользователю.
-        """
-        swap_request: SwapPeopleRequest = self.get_object()
-        swap_request.cancel(request.user)
-
-        serializer = self.get_serializer(swap_request)
-        return Response(serializer.data, status=HTTP_200_OK)
-
-    @extend_schema(tags=["SwapPeople"])
-    @action(methods=("POST",), detail=False)
-    def create_swap_people_request(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         """
         Создать запрос на замену.
 
@@ -308,3 +252,54 @@ class SwapPeopleViewSet(ListModelMixin, GenericViewSet):
     def list(self, request, *args, **kwargs):
         """Получить список всех запросов на замену."""
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(tags=["SwapPeople"])
+    @action(methods=("GET",), detail=False, url_path="incoming")
+    def get_incoming_requests(self, request, *args, **kwargs):
+        """Получить список входящих запросов на замену для текущего пользователя."""
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(tags=["SwapPeople"])
+    @action(methods=("POST",), detail=True, url_path="accept")
+    def accept_swap_people_request(self, request, pk, *args, **kwargs):
+        """
+        Принять запрос на замену.
+
+        :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
+        :raises DutySwapException: Если заявка не направлена текущему пользователю.
+        """
+        swap_request: SwapPeopleRequest = self.get_object()
+        swap_request.accept(request.user)
+
+        serializer = self.get_serializer(swap_request)
+        return Response(serializer.data, status=HTTP_200_OK)
+
+    @extend_schema(tags=["SwapPeople"])
+    @action(methods=("POST",), detail=True, url_path="decline")
+    def decline_swap_people_request(self, request, pk, *args, **kwargs):
+        """
+        Отклонить запрос на замену.
+
+        :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
+        :raises DutySwapException: Если заявка не направлена текущему пользователю.
+        """
+        swap_request: SwapPeopleRequest = self.get_object()
+        swap_request.decline(request.user)
+
+        serializer = self.get_serializer(swap_request)
+        return Response(serializer.data, status=HTTP_200_OK)
+
+    @extend_schema(tags=["SwapPeople"])
+    @action(methods=("POST",), detail=True, url_path="cancel")
+    def cancel_swap_people_request(self, request, pk, *args, **kwargs):
+        """
+        Отменить запрос на замену.
+
+        :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
+        :raises DutySwapException: Если заявка не направлена текущему пользователю.
+        """
+        swap_request: SwapPeopleRequest = self.get_object()
+        swap_request.cancel(request.user)
+
+        serializer = self.get_serializer(swap_request)
+        return Response(serializer.data, status=HTTP_200_OK)

@@ -41,7 +41,7 @@ def test_create_swap_people_request(
         "to_swap_duty_pk": target_duty.pk,
         "to_swap_user_pk": user2.pk,
     }
-    url = reverse("people-swaps-create-swap-people-request")
+    url = reverse("people-swaps-list")
     response = user_client.post(url, data)
 
     assert response.status_code == HTTP_201_CREATED

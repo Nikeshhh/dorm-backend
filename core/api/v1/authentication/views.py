@@ -36,7 +36,7 @@ class AuthenticationViewSet(GenericViewSet):
         return Response({"data": "Успешный выход из аккаунта"}, HTTP_200_OK)
 
     @extend_schema(tags=["Authentication"])
-    @action(methods=("GET",), detail=False)
+    @action(methods=("GET",), url_path="is-authenticated", detail=False)
     def is_authenticated(self, request, *args, **kwargs):
         """Возвращает true, если пользователь авторизован, иначе false."""
         return Response(
