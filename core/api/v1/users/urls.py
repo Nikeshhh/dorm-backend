@@ -4,7 +4,7 @@ from core.api.v1.users.views import UsersViewSet
 
 
 router = DefaultRouter()
-router.register("users-views", UsersViewSet, basename="users-views")
+router.register("", UsersViewSet, basename="users-viewset")
 
 
 urlpatterns = [] + router.urls

@@ -41,7 +41,7 @@ class UsersViewSet(GenericViewSet):
         return Response(serializer.data, HTTP_200_OK)
 
     @extend_schema(tags=["Users"])
-    @action(methods=("GET",), detail=False)
+    @action(methods=("GET",), detail=False, url_path="residents")
     def list_residents(self, request, *args, **kwargs):
         """
         Получить список всех жильцов в общежитии.

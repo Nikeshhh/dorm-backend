@@ -29,7 +29,12 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
         return queryset
 
     @extend_schema(tags=["Laundry"])
-    @action(methods=("GET",), detail=False)
+    def list(self, request, *args, **kwargs):
+        """Получить список всех записей."""
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(tags=["Laundry"])
+    @action(methods=("GET",), detail=False, url_path="today")
     def today_records_list(self, request, *args, **kwargs):
         """
         Получить список записей на сегодняшний день.
@@ -41,7 +46,7 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
         return super().list(request, *args, **kwargs)
 
     @extend_schema(tags=["Laundry"])
-    @action(methods=("POST",), detail=True)
+    @action(methods=("POST",), detail=True, url_path="take")
     def take_record(self, request, *args, **kwargs):
         """
         Зарезервировать запись.
@@ -60,7 +65,7 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
         return Response({"detail": "Успешная запись"})
 
     @extend_schema(tags=["Laundry"])
-    @action(methods=("POST",), detail=True)
+    @action(methods=("POST",), detail=True, url_path="free")
     def free_record(self, request, *args, **kwargs):
         """
         Освободить запись.
@@ -83,7 +88,7 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
         return Response({"detail": "Запись успешно освобождена"})
 
     @extend_schema(tags=["Laundry"])
-    @action(methods=("GET",), detail=False)
+    @action(methods=("GET",), detail=False, url_path="today/my")
     def my_records_today(self, request, *args, **kwargs):
         """Получить список сегодняшних записей, зарезервированных текущим пользователем."""
         today = timezone.now().date()
@@ -95,7 +100,7 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
         return Response(serializer.data, HTTP_200_OK)
 
     @extend_schema(tags=["Laundry"])
-    @action(methods=("GET",), detail=False)
+    @action(methods=("GET",), detail=False, url_path="today/stats")
     def today_records_stats(self, request, *args, **kwargs):
         """
         Получить статистику записей на сегодняшний день.
@@ -113,8 +118,3 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
             message = "На сегодня нет свободных записей"
 
         return Response({"message": message}, HTTP_200_OK)
-
-    @extend_schema(tags=["Laundry"])
-    def list(self, request, *args, **kwargs):
-        """Получить список всех записей."""
-        return super().list(request, *args, **kwargs)

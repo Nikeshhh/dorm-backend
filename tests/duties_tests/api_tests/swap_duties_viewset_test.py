@@ -39,7 +39,7 @@ def test_create_swap_duties_request(
     user1, user2 = user_for_client, test_users[1]
     duty1, duty2 = user1.kitchen_duties.first(), user2.kitchen_duties.first()
 
-    url = reverse("duty-swaps-create-swap-duties-request")
+    url = reverse("duty-swaps-list")
     data = {
         "initiator_duty_pk": duty1.pk,
         "to_swap_duty_pk": duty2.pk,
