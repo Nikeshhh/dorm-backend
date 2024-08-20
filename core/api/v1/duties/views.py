@@ -18,7 +18,7 @@ from core.api.v1.duties.serializers import (
     SwapPeopleRequestSerializer,
 )
 from core.apps.duties.models import KitchenDuty, SwapDutiesRequest, SwapPeopleRequest
-from core.apps.duties.services import SwapDutiesService
+from core.apps.duties.services import SwapDutiesService, SwapPeopleService
 from core.apps.users.models import CustomUser
 
 
@@ -134,14 +134,12 @@ class SwapDutiesViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
         initiator = request.user
         data = self.get_serializer(request.data).data
 
-        swap_duties_service = SwapDutiesService(initiator)
-
         # TODO: Replace this logic with service logic
         initiator_duty = KitchenDuty.objects.get(pk=data.get("initiator_duty_pk"))
         to_swap_duty = KitchenDuty.objects.get(pk=data.get("to_swap_duty_pk"))
         to_swap_user = CustomUser.objects.get(pk=data.get("to_swap_resident_pk"))
 
-        swap_request = swap_duties_service.create(
+        swap_request = SwapDutiesService.create(
             initiator_duty=initiator_duty,
             initiator=initiator,
             target_duty=to_swap_duty,
@@ -251,11 +249,14 @@ class SwapPeopleViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
         initiator = request.user
         data = self.get_serializer(request.data).data
 
+        # TODO: replace with service logic
         to_swap_user = CustomUser.objects.get(pk=data.get("to_swap_user_pk"))
         to_swap_duty = KitchenDuty.objects.get(pk=data.get("to_swap_duty_pk"))
 
-        swap_request = SwapPeopleRequest.objects.create(
-            current_user=initiator, to_swap=to_swap_user, duty=to_swap_duty
+        swap_people_service = SwapPeopleService(initiator)
+
+        swap_request = swap_people_service.create(
+            initiator=initiator, target=to_swap_user, initiator_duty=to_swap_duty
         )
 
         serializer = self.serializer_class(swap_request)
@@ -281,8 +282,11 @@ class SwapPeopleViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
         :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
         :raises DutySwapException: Если заявка не направлена текущему пользователю.
         """
+        # TODO: replace with service logic
         swap_request: SwapPeopleRequest = self.get_object()
-        swap_request.accept(request.user)
+
+        swap_people_service = SwapPeopleService(request.user, swap_request)
+        swap_people_service.accept()
 
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)
@@ -296,8 +300,11 @@ class SwapPeopleViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
         :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
         :raises DutySwapException: Если заявка не направлена текущему пользователю.
         """
+        # TODO: replace with service logic
         swap_request: SwapPeopleRequest = self.get_object()
-        swap_request.decline(request.user)
+
+        swap_people_service = SwapPeopleService(request.user, swap_request)
+        swap_people_service.decline()
 
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)
@@ -311,8 +318,11 @@ class SwapPeopleViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
         :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
         :raises DutySwapException: Если заявка не направлена текущему пользователю.
         """
+        # TODO: replace with service logic
         swap_request: SwapPeopleRequest = self.get_object()
-        swap_request.cancel(request.user)
+
+        swap_people_service = SwapPeopleService(request.user, swap_request)
+        swap_people_service.cancel()
 
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)

@@ -73,10 +73,8 @@ def test_swap_duties_creation_error_same_duty(test_duties, test_users):
     assert user1 in target_duty.people.all()
     assert user2 not in target_duty.people.all()
 
-    swap_duties_service = SwapDutiesService(user2)
-
     with pytest.raises(DutySwapException):
-        swap_duties_service.create(
+        SwapDutiesService.create(
             initiator_duty=duty1, initiator=user1, target_duty=duty2, target=user2
         )
 
@@ -90,10 +88,8 @@ def test_swap_duties_error_same_user(test_duties, test_users):
     user1 = user2 = test_users[0]
     duty1, duty2 = test_duties[0], test_duties[1]
 
-    swap_duties_service = SwapDutiesService(user1)
-
     with pytest.raises(DutySwapException):
-        swap_duties_service.create(
+        SwapDutiesService.create(
             initiator_duty=duty1, initiator=user1, target_duty=duty2, target=user2
         )
 

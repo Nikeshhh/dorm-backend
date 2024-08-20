@@ -1,7 +1,7 @@
 import pytest
 
 from core.apps.duties.exceptions import DutySwapException
-from core.apps.duties.models import SwapPeopleRequest
+from core.apps.duties.services import SwapPeopleService
 
 
 @pytest.mark.django_db
@@ -16,11 +16,13 @@ def test_swap_people_accept_success(test_duties, test_users):
     assert user1 in target_duty.people.all()
     assert user2 not in target_duty.people.all()
 
-    swap_request = SwapPeopleRequest.objects.create(
-        current_user=user1, to_swap=user2, duty=target_duty
+    swap_request = SwapPeopleService.create(
+        initiator=user1, target=user2, initiator_duty=target_duty
     )
 
-    swap_request.accept(user2)
+    swap_people_service = SwapPeopleService(user2, swap_request)
+
+    swap_people_service.accept()
 
     assert user1 not in target_duty.people.all()
     assert user2 in target_duty.people.all()
@@ -44,11 +46,13 @@ def test_swap_people_decline_success(test_duties, test_users):
     assert user1 in target_duty.people.all()
     assert user2 not in target_duty.people.all()
 
-    swap_request = SwapPeopleRequest.objects.create(
-        current_user=user1, to_swap=user2, duty=target_duty
+    swap_request = SwapPeopleService.create(
+        initiator=user1, target=user2, initiator_duty=target_duty
     )
 
-    swap_request.decline(user2)
+    swap_people_service = SwapPeopleService(user2, swap_request)
+
+    swap_people_service.decline()
 
     assert user1 in target_duty.people.all()
     assert user2 not in target_duty.people.all()
@@ -74,8 +78,8 @@ def test_swap_people_on_already_in_duty(test_duties, test_users):
     assert user2 in target_duty.people.all()
 
     with pytest.raises(DutySwapException):
-        SwapPeopleRequest.objects.create(
-            current_user=user1, to_swap=user2, duty=target_duty
+        SwapPeopleService.create(
+            initiator=user1, target=user2, initiator_duty=target_duty
         )
 
     assert user1 in target_duty.people.all()
@@ -95,8 +99,8 @@ def test_swap_people_on_unowned_duty(test_duties, test_users):
     assert user2 not in target_duty.people.all()
 
     with pytest.raises(DutySwapException):
-        SwapPeopleRequest.objects.create(
-            current_user=user1, to_swap=user2, duty=target_duty
+        SwapPeopleService.create(
+            initiator=user1, target=user2, initiator_duty=target_duty
         )
 
     assert user1 not in target_duty.people.all()
@@ -116,8 +120,8 @@ def test_swap_people_self(test_duties, test_users):
     assert user2 not in target_duty.people.all()
 
     with pytest.raises(DutySwapException):
-        SwapPeopleRequest.objects.create(
-            current_user=user1, to_swap=user2, duty=target_duty
+        SwapPeopleService.create(
+            initiator=user1, target=user2, initiator_duty=target_duty
         )
 
     assert user1 not in target_duty.people.all()

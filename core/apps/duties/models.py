@@ -1,12 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from core.apps.duties.exceptions import (
-    DutyIsLockedException,
-    DutySwapException,
-    SwapRequestStatusException,
-)
-from core.apps.users.exceptions import RoleViolationException
 from core.apps.users.models import CustomUser
 
 
@@ -39,20 +33,9 @@ class KitchenDuty(models.Model):
     def __str__(self) -> str:
         return f'{self.date}: {(', '.join(str(pupil) for pupil in self.people.all()))}'
 
-    def finish(self) -> None:
+    def finish(self):
+        """Завершить дежурство, только для удобства тестов"""
         self.finished = True
-        self.save()
-
-    def swap_pupils(self, current: CustomUser, new: CustomUser) -> None:
-        if self.finished:
-            raise DutyIsLockedException("Дежурство окончено и недоступно для изменения")
-        if current not in self.people.all() or new in self.people.all():
-            raise DutySwapException(
-                f"Невозможно провести замену дежурного {current} на {new}"
-            )
-
-        self.people.remove(current)
-        self.people.add(new)
         self.save()
 
 
@@ -118,54 +101,6 @@ class SwapPeopleRequest(models.Model):
     declined = models.BooleanField(default=False, verbose_name="Отклонена?")
     canceled = models.BooleanField(default=False, verbose_name="Отменена?")
 
-    def accept(self, user: CustomUser):
-        if not self.is_mutable:
-            raise SwapRequestStatusException
-        if self.to_swap != user:
-            raise DutySwapException(
-                f"Пользователь {user} не может принять заявку {self}, так как не имеет к ней доступа"
-            )
-        self.accepted = True
-        self.save()
-        self.duty.swap_pupils(self.current_user, self.to_swap)
-
-    def decline(self, user: CustomUser):
-        if not self.is_mutable:
-            raise SwapRequestStatusException
-        if self.to_swap != user:
-            raise DutySwapException(
-                f"Пользователь {user} не может отклонить заявку {self}, так как не имеет к ней доступа"
-            )
-        self.declined = True
-        self.save()
-
-    def cancel(self, user: CustomUser):
-        if not self.is_mutable:
-            raise SwapRequestStatusException
-        if self.current_user != user:
-            raise DutySwapException(
-                f"Пользователь {user} не может отменить заявку {self}, так как не является ее инициатором"
-            )
-        self.canceled = True
-        self.save()
-
     @property
     def is_mutable(self):
         return not (self.canceled or self.declined or self.accepted)
-
-    def save(self, *args, **kwargs) -> None:
-        if not self.current_user.is_resident or not self.to_swap.is_resident:
-            raise RoleViolationException
-        if self.current_user not in self.duty.people.all():
-            raise DutySwapException(
-                f"Дежурный {self.current_user} не принадлежит дежурству {self.duty}"
-            )
-        if self.to_swap in self.duty.people.all():
-            raise DutySwapException(
-                f"Дежурный {self.to_swap} уже принадлежит дежурству {self.duty}"
-            )
-        if self.current_user == self.to_swap:
-            raise DutySwapException(
-                "Невозможно создать заявку на обмен между идентичными пользователями"
-            )
-        return super().save(*args, **kwargs)

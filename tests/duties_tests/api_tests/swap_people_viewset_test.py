@@ -35,6 +35,7 @@ def test_create_swap_people_request(
     Тестирует успешное создание запроса на замену.
     """
     target_duty = test_duties[0]
+    print(target_duty)
     user1, user2 = test_users[:2]
 
     data = {
@@ -44,7 +45,7 @@ def test_create_swap_people_request(
     url = reverse("people-swaps-list")
     response = user_client.post(url, data)
 
-    assert response.status_code == HTTP_201_CREATED
+    assert response.status_code == HTTP_201_CREATED, response.json()
 
     data = response.json()
     swap_request = SwapPeopleRequest.objects.get(pk=data.get("pk"))
