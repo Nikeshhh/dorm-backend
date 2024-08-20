@@ -2,6 +2,7 @@ import pytest
 
 from core.apps.duties.exceptions import DutySwapException, SwapRequestStatusException
 from core.apps.duties.models import SwapDutiesRequest
+from core.apps.duties.services import SwapDutiesService
 
 
 @pytest.mark.django_db
@@ -14,7 +15,9 @@ def test_swap_duties_accept_success(test_duties, test_users):
         first_duty=duty1, first_user=user1, second_duty=duty2, second_user=user2
     )
 
-    swap_request.accept(user2)
+    swap_duties_service = SwapDutiesService(user2, swap_request)
+
+    swap_duties_service.accept()
 
     duty1.refresh_from_db()
     duty2.refresh_from_db()
@@ -41,7 +44,9 @@ def test_swap_duties_decline_success(test_duties, test_users):
         first_duty=duty1, first_user=user1, second_duty=duty2, second_user=user2
     )
 
-    swap_request.decline(user2)
+    swap_duties_service = SwapDutiesService(user2, swap_request)
+
+    swap_duties_service.decline()
 
     duty1.refresh_from_db()
     duty2.refresh_from_db()
@@ -60,7 +65,7 @@ def test_swap_duties_decline_success(test_duties, test_users):
 
 @pytest.mark.django_db
 def test_swap_duties_creation_error_same_duty(test_duties, test_users):
-    """Успешное отклонение заявки с сохранением исходного состояния"""
+    """Ошибка отклонения запроса, при попытке создать заявку на обмен идентичными дежурствами"""
     user1, user2 = test_users[:2]
     target_duty = user1.kitchen_duties.first()
     duty1 = duty2 = target_duty
@@ -68,9 +73,11 @@ def test_swap_duties_creation_error_same_duty(test_duties, test_users):
     assert user1 in target_duty.people.all()
     assert user2 not in target_duty.people.all()
 
+    swap_duties_service = SwapDutiesService(user2)
+
     with pytest.raises(DutySwapException):
-        SwapDutiesRequest.objects.create(
-            first_duty=duty1, first_user=user1, second_duty=duty2, second_user=user2
+        swap_duties_service.create(
+            initiator_duty=duty1, initiator=user1, target_duty=duty2, target=user2
         )
 
     assert user1 in target_duty.people.all()
@@ -83,9 +90,11 @@ def test_swap_duties_error_same_user(test_duties, test_users):
     user1 = user2 = test_users[0]
     duty1, duty2 = test_duties[0], test_duties[1]
 
+    swap_duties_service = SwapDutiesService(user1)
+
     with pytest.raises(DutySwapException):
-        SwapDutiesRequest.objects.create(
-            first_duty=duty1, first_user=user1, second_duty=duty2, second_user=user2
+        swap_duties_service.create(
+            initiator_duty=duty1, initiator=user1, target_duty=duty2, target=user2
         )
 
 
@@ -107,11 +116,14 @@ def test_swap_duties_cancel_success(test_duties, test_users):
         first_duty=duty1, first_user=user1, second_duty=duty2, second_user=user2
     )
 
-    swap_request.cancel(user1)
+    swap_duties_service = SwapDutiesService(user1, swap_request)
 
+    swap_duties_service.cancel()
+
+    swap_duties_service = SwapDutiesService(user2, swap_request)
     with pytest.raises(SwapRequestStatusException):
-        swap_request.accept(user2)
-        swap_request.decline(user2)
+        swap_duties_service.accept()
+        swap_duties_service.decline()
 
     duty1.refresh_from_db()
     duty2.refresh_from_db()

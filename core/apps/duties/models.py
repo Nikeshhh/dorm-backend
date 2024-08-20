@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.transaction import atomic
 
 from core.apps.duties.exceptions import (
     DutyIsLockedException,
@@ -89,59 +88,13 @@ class SwapDutiesRequest(models.Model):
     declined = models.BooleanField(default=False, verbose_name="Отклонена?")
     canceled = models.BooleanField(default=False, verbose_name="Отменена?")
 
+    @property
+    def is_mutable(self) -> bool:
+        return not self.accepted and not self.declined and not self.canceled
+
     class Meta:
         verbose_name = "Запрос на обмен"
         verbose_name_plural = "Запросы на обмен"
-
-    def accept(self, user: CustomUser):
-        if not self.is_mutable:
-            raise SwapRequestStatusException
-        if self.second_user != user:
-            raise DutySwapException(
-                f"Пользователь {user} не может принять заявку {self}, так как не имеет к ней доступа"
-            )
-        with atomic():
-            self.first_duty.swap_pupils(self.first_user, self.second_user)
-            self.second_duty.swap_pupils(self.second_user, self.first_user)
-            self.accepted = True
-            self.save()
-
-    def decline(self, user: CustomUser):
-        if not self.is_mutable:
-            raise SwapRequestStatusException
-        if self.second_user != user:
-            raise DutySwapException(
-                f"Пользователь {user} не может отклонить заявку {self}, так как не имеет к ней доступа"
-            )
-        self.declined = True
-        self.save()
-
-    @property
-    def is_mutable(self):
-        return not (self.canceled or self.declined or self.accepted)
-
-    def cancel(self, user: CustomUser):
-        if not self.is_mutable:
-            raise SwapRequestStatusException
-        if self.first_user != user:
-            raise DutySwapException(
-                f"Пользователь {user} не может отменить заявку {self}, так как не является ее инициатором"
-            )
-        self.canceled = True
-        self.save()
-
-    def save(self, *args, **kwargs) -> None:
-        if not self.first_user.is_resident or not self.second_user.is_resident:
-            raise RoleViolationException
-        if self.first_duty == self.second_duty:
-            raise DutySwapException(
-                "Невозможно создать заявку на обмен между идентичными дежурствами"
-            )
-        if self.first_user == self.second_user:
-            raise DutySwapException(
-                "Невозможно создать заявку на обмен между идентичными пользователями"
-            )
-        return super().save(*args, **kwargs)
 
 
 class SwapPeopleRequest(models.Model):

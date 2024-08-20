@@ -18,6 +18,7 @@ from core.api.v1.duties.serializers import (
     SwapPeopleRequestSerializer,
 )
 from core.apps.duties.models import KitchenDuty, SwapDutiesRequest, SwapPeopleRequest
+from core.apps.duties.services import SwapDutiesService
 from core.apps.users.models import CustomUser
 
 
@@ -133,15 +134,18 @@ class SwapDutiesViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
         initiator = request.user
         data = self.get_serializer(request.data).data
 
+        swap_duties_service = SwapDutiesService(initiator)
+
+        # TODO: Replace this logic with service logic
         initiator_duty = KitchenDuty.objects.get(pk=data.get("initiator_duty_pk"))
         to_swap_duty = KitchenDuty.objects.get(pk=data.get("to_swap_duty_pk"))
         to_swap_user = CustomUser.objects.get(pk=data.get("to_swap_resident_pk"))
 
-        swap_request = SwapDutiesRequest.objects.create(
-            first_duty=initiator_duty,
-            first_user=initiator,
-            second_duty=to_swap_duty,
-            second_user=to_swap_user,
+        swap_request = swap_duties_service.create(
+            initiator_duty=initiator_duty,
+            initiator=initiator,
+            target_duty=to_swap_duty,
+            target=to_swap_user,
         )
 
         serializer = SwapDutiesRequestSerializer(swap_request)
@@ -167,8 +171,11 @@ class SwapDutiesViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
         :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
         :raises DutySwapException: Если запрос не направлен текущему пользователю.
         """
+        # TODO: Replace this logic with service logic
         swap_request: SwapDutiesRequest = self.get_object()
-        swap_request.accept(request.user)
+
+        swap_duties_service = SwapDutiesService(request.user, swap_request)
+        swap_duties_service.accept()
 
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)
@@ -182,8 +189,11 @@ class SwapDutiesViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
         :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
         :raises DutySwapException: Если запрос не направлен текущему пользователю.
         """
+        # TODO: Replace this logic with service logic
         swap_request: SwapDutiesRequest = self.get_object()
-        swap_request.decline(request.user)
+
+        swap_duties_service = SwapDutiesService(request.user, swap_request)
+        swap_duties_service.decline()
 
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)
@@ -197,8 +207,11 @@ class SwapDutiesViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
         :raises SwapRequestStatusException: Если дежурство недоступно для изменения.
         :raises DutySwapException: Если пользователь не имеет доступа к этому действию.
         """
+        # TODO: Replace this logic with service logic
         swap_request: SwapDutiesRequest = self.get_object()
-        swap_request.cancel(request.user)
+
+        swap_duties_service = SwapDutiesService(request.user, swap_request)
+        swap_duties_service.cancel()
 
         serializer = self.get_serializer(swap_request)
         return Response(serializer.data, status=HTTP_200_OK)
