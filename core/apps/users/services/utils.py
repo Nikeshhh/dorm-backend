@@ -1,9 +1,10 @@
 import csv
 from datetime import datetime
-from string import ascii_letters
 from random import choices
+from string import ascii_letters
 
 from django.db.transaction import atomic
+
 from core.apps.rooms.models import Room
 from core.apps.users.models import CustomUser
 

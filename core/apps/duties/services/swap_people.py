@@ -23,6 +23,10 @@ class SwapPeopleService(BaseSwapRequestService):
         self._user = current_user
 
     @classmethod
+    def get_by_id(cls, id: int) -> SwapPeopleRequest:
+        return SwapPeopleRequest.objects.get(id=id)
+
+    @classmethod
     def create(
         cls, initiator: UserModel, initiator_duty: KitchenDuty, target: UserModel
     ) -> SwapPeopleRequest:

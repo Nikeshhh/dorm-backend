@@ -9,6 +9,7 @@ from drf_spectacular.utils import extend_schema
 
 from core.api.v1.users.serializers import ResidentSerializer, UserSerializer
 from core.apps.users.models import CustomUser
+from core.apps.users.services import UserService
 
 
 class UsersViewSet(GenericViewSet):
@@ -21,16 +22,6 @@ class UsersViewSet(GenericViewSet):
         if self.action == "list_residents":
             return ResidentSerializer
         return super().get_serializer_class()
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        if self.action == "list_residents":
-            queryset = (
-                queryset.select_related("room")
-                .filter(resident=True)
-                .order_by("room__number")
-            )
-        return queryset
 
     @extend_schema(tags=["Users"])
     @action(methods=("GET",), detail=False)
@@ -48,6 +39,12 @@ class UsersViewSet(GenericViewSet):
 
         Список отсортирован по номеру комнаты.
         """
-        serializer = self.get_serializer(self.get_queryset(), many=True)
+        residents_list = (
+            UserService.get_all_residents()
+            .select_related("room")
+            .order_by("room__number")
+        )
+
+        serializer = self.get_serializer(residents_list, many=True)
 
         return Response(serializer.data, HTTP_200_OK)

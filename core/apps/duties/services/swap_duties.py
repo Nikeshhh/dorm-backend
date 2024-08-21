@@ -21,6 +21,10 @@ class SwapDutiesService(BaseSwapRequestService):
         self._user = current_user
 
     @classmethod
+    def get_by_id(cls, id: int) -> SwapDutiesRequest:
+        return SwapDutiesRequest.objects.get(id=id)
+
+    @classmethod
     def create(
         cls,
         initiator: UserModel,

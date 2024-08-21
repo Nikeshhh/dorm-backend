@@ -161,7 +161,7 @@ def test_cancel_swap_duties_request(
 
 
 @pytest.mark.django_db
-def test_get_incoming_requests(client, user_for_client, test_duties):  # TODO: implement
+def test_get_incoming_requests(client, user_for_client, test_duties):
     """
     Тестирует успешное получение списка запросов, адресованных пользователю.
     """

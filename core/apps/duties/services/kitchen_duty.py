@@ -7,6 +7,10 @@ class KitchenDutyService:
     def __init__(self, object: KitchenDuty):
         self._object = object
 
+    @classmethod
+    def get_by_id(cls, id: int) -> KitchenDuty:
+        return KitchenDuty.objects.get(id=id)
+
     def finish(self) -> None:
         """Завершает дежурство, запрещая его редактировать"""
         self._object.finished = True
