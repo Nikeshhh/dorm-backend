@@ -3,10 +3,7 @@ from rest_framework.serializers import (
     Serializer,
     IntegerField,
     CharField,
-    ValidationError,
 )
-from rest_framework.exceptions import NotFound
-
 from core.apps.rooms.models import Room, RoomRecord
 from core.apps.users.models import CustomUser
 
@@ -57,31 +54,3 @@ class RoomRecordSerializer(Serializer):
     grade = IntegerField()
     comments = CharField(required=False)
     room_pk = IntegerField(required=False)
-
-    def validate(self, attrs):
-        if not 2 <= attrs.get("grade") <= 5:
-            raise ValidationError("Оценка должна находиться в промежутке от 2 до 5")
-        return attrs
-
-    def create(self, validated_data):
-        try:
-            room = Room.objects.get(pk=validated_data.get("room_pk"))
-        except Room.DoesNotExist:
-            raise NotFound(f'Комната с pk={validated_data.get('room_pk')} не найдена')
-        author = self.context.get("request").user
-        instance = RoomRecord.objects.create(
-            grade=validated_data.get("grade"),
-            comments=validated_data.get("comments"),
-            room=room,
-            author=author,
-        )
-        return instance
-
-    def update(self, instance, validated_data):
-        instance.grade = validated_data.get("grade")
-        instance.comments = validated_data.get("comments")
-        instance.save()
-        return instance
-
-    def save(self, **kwargs):
-        return super().save(**kwargs)

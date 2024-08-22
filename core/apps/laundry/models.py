@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
+
 UserModel = get_user_model()
 
 
@@ -26,9 +27,3 @@ class LaundryRecord(models.Model):
     @property
     def is_available(self) -> bool:
         return not self.owner
-
-
-class LaundryRecordTemplate(models.Model): ...
-
-
-class LaundryScheduleTemplate(models.Model): ...

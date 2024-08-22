@@ -49,6 +49,11 @@ def test_create_swap_duties_request(
     assert response.status_code == HTTP_201_CREATED
 
     data = response.json()
+
+    assert data.get("accepted") is False
+    assert data.get("declined") is False
+    assert data.get("canceled") is False
+
     swap_request = SwapDutiesRequest.objects.get(pk=data.get("pk"))
 
     assert swap_request.first_user == user_for_client
@@ -84,6 +89,12 @@ def test_accept_swap_duties_request(
     response = user_client.post(url)
 
     assert response.status_code == HTTP_200_OK, print(response.json())
+
+    data = response.json()
+
+    assert data.get("accepted") is True
+    assert data.get("declined") is False
+    assert data.get("canceled") is False
 
     duty1.refresh_from_db()
     duty2.refresh_from_db()
@@ -128,6 +139,12 @@ def test_decline_swap_duties_request(
 
     assert response.status_code == HTTP_200_OK, print(response.json())
 
+    data = response.json()
+
+    assert data.get("accepted") is False
+    assert data.get("declined") is True
+    assert data.get("canceled") is False
+
     duty1.refresh_from_db()
     duty2.refresh_from_db()
 
@@ -170,6 +187,12 @@ def test_cancel_swap_duties_request(
     response = user_client.post(url)
 
     assert response.status_code == HTTP_200_OK, print(response.json())
+
+    data = response.json()
+
+    assert data.get("accepted") is False
+    assert data.get("declined") is False
+    assert data.get("canceled") is True
 
     duty1.refresh_from_db()
     duty2.refresh_from_db()

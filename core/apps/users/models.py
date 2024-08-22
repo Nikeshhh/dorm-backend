@@ -23,6 +23,7 @@ class CustomUser(AbstractBaseUser):
         null=True,
         blank=True,
         verbose_name="Комната проживания",
+        related_name="users",
     )
 
     active = models.BooleanField(default=True)

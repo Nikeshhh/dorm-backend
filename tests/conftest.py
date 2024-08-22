@@ -145,7 +145,8 @@ def test_user_with_finished_duties() -> CustomUser:
     for i in range(1, 11):
         duty = KitchenDuty.objects.create(date=date.today() + timedelta(days=i))
         duty.people.add(user)
-        duty.finish()
+        duty.finished = True
+        duty.save()
     return user
 
 

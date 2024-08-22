@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 
 from core.apps.rooms.choices import ROOM_GRADE_CHOICES
 from core.apps.users.models import CustomUser
@@ -31,7 +30,7 @@ class Room(models.Model):
 
 
 class RoomRecord(models.Model):
-    date = models.DateTimeField(verbose_name="Дата и время записи")
+    date = models.DateTimeField(auto_now_add=True, verbose_name="Дата и время записи")
     grade = models.PositiveSmallIntegerField(
         verbose_name="Оценка", choices=ROOM_GRADE_CHOICES
     )
@@ -50,10 +49,6 @@ class RoomRecord(models.Model):
 
     def __str__(self) -> str:
         return f'{self.room} - {self.date.strftime('%d.%m.%Y %H:%M')}. Оценка: {self.grade}'
-
-    def save(self, *args, **kwargs) -> None:
-        self.date = timezone.now()
-        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Запись в книге комнаты"
