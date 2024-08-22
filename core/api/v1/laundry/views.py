@@ -3,7 +3,6 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.mixins import ListModelMixin
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from django.utils import timezone
@@ -11,9 +10,8 @@ from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 
 from core.api.v1.laundry.serializers import LaundrySerializer
-from core.apps.laundry.exceprtions import RecordStateException
 from core.apps.laundry.models import LaundryRecord
-from core.apps.laundry.services import create_laundry_records_for_today
+from core.apps.laundry.services import LaundryService, create_laundry_records_for_today
 
 
 class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
@@ -47,26 +45,24 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
 
     @extend_schema(tags=["Laundry"])
     @action(methods=("POST",), detail=True, url_path="take")
-    def take_record(self, request, *args, **kwargs):
+    def take_record(self, request, pk, *args, **kwargs):
         """
         Зарезервировать запись.
 
         :param id: ID записи.
         :raises RecordStateException: Если запись уже занята.
         """
-        record = self.get_object()
+        record = LaundryService.get_by_id(id=pk)
 
-        if not record.is_available:
-            raise RecordStateException("Запись уже занята")
+        laundry_service = LaundryService(current_user=request.user, record=record)
 
-        record.owner = request.user
-        record.save()
+        laundry_service.take_record()
 
         return Response({"detail": "Успешная запись"})
 
     @extend_schema(tags=["Laundry"])
     @action(methods=("POST",), detail=True, url_path="free")
-    def free_record(self, request, *args, **kwargs):
+    def free_record(self, request, pk, *args, **kwargs):
         """
         Освободить запись.
 
@@ -74,16 +70,11 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
         :raises RecordStateException: Если запись уже свободна.
         :raises PermissionDenied: Если запись не принадлежит текущему пользователю.
         """
-        record = self.get_object()
+        record = LaundryService.get_by_id(id=pk)
 
-        if record.is_available:
-            raise RecordStateException("Запись уже свободна")
+        laundry_service = LaundryService(current_user=request.user, record=record)
 
-        if not record.owner == request.user:
-            raise PermissionDenied("Запись вам не принадлежит")
-
-        record.owner = None
-        record.save()
+        laundry_service.free_record()
 
         return Response({"detail": "Запись успешно освобождена"})
 
@@ -91,9 +82,7 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
     @action(methods=("GET",), detail=False, url_path="today/my")
     def my_records_today(self, request, *args, **kwargs):
         """Получить список сегодняшних записей, зарезервированных текущим пользователем."""
-        today = timezone.now().date()
-        user = request.user
-        records = self.get_queryset().filter(record_date=today).filter(owner=user)
+        records = LaundryService.get_users_records_today(request.user)
 
         serializer = self.get_serializer(records, many=True)
 
@@ -108,13 +97,6 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
         Возвращает строку, которая сообщает количество свободных записей,
         или сообщение об отсуствии свободных записей.
         """
-        today = timezone.now().date()
-        records_count = (
-            self.get_queryset().filter(owner=None, record_date=today).count()
-        )
-        if records_count > 0:
-            message = f"Свободно {records_count} записей"
-        else:
-            message = "На сегодня нет свободных записей"
+        message = LaundryService.get_today_records_stats()
 
         return Response({"message": message}, HTTP_200_OK)
