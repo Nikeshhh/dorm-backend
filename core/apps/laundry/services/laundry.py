@@ -1,22 +1,9 @@
-from datetime import date, time
 from django.utils import timezone
-from django.db.transaction import atomic
 from rest_framework.exceptions import PermissionDenied
 
 from core.apps.laundry.exceptions import RecordStateException
 from core.apps.laundry.models import LaundryRecord
 from core.apps.users.models import CustomUser
-
-
-def create_laundry_records_for_today():
-    today = date.today()
-    with atomic():
-        for hour in range(8, 22):
-            LaundryRecord.objects.create(
-                record_date=today,
-                time_start=time(hour=hour, minute=0),
-                time_end=time(hour=hour + 1, minute=0),
-            )
 
 
 class LaundryService:
@@ -25,6 +12,10 @@ class LaundryService:
     """
 
     def __init__(self, current_user: CustomUser, record: LaundryRecord) -> None:
+        """
+        :param current_user: Текущий пользователь при работе сервиса.
+        :param record: Текущая запись при работе сервиса.
+        """
         self._record = record
         self._user = current_user
 
