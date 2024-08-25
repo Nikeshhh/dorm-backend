@@ -6,12 +6,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
 from django.utils import timezone
+import logging
 
 from drf_spectacular.utils import extend_schema
 
 from core.api.v1.laundry.serializers import LaundrySerializer
 from core.apps.laundry.models import LaundryRecord
 from core.apps.laundry.services import LaundryService, create_laundry_records_for_today
+
+
+logger = logging.getLogger(__name__)
 
 
 class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
@@ -40,7 +44,9 @@ class LaundryRecordViewSet(ListModelMixin, GenericViewSet):
         :side effect: При отсуствии записей, происходит создание новых на сегодня.
         """
         if not self.filter_queryset(self.get_queryset()):
+            logging.info("Запуск создания записей на сегодня")
             create_laundry_records_for_today()
+            logging.info("Записи на сегодня успешно созданы")
         return super().list(request, *args, **kwargs)
 
     @extend_schema(tags=["Laundry"])

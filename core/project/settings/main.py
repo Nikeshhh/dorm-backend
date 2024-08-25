@@ -199,3 +199,31 @@ CELERY_BEAT_SCHEDULE = {
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+
+# Logging settings
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {"format": "[{levelname}] {asctime} {name} {message}", "style": "{"},
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",
+            "formatter": "simple",
+        },
+    },
+    "loggers": {
+        "core.api.v1.authentication.views": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+        },
+        "core.api.v1.laundry.views": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+        },
+    },
+}
