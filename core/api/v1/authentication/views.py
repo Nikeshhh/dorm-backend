@@ -1,3 +1,4 @@
+from django.http import HttpRequest
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,7 +8,12 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import AnonymousUser
 from drf_spectacular.utils import extend_schema
 
+import logging
+
 from core.api.v1.authentication.serializers import LoginSerializer
+
+
+logger = logging.getLogger(__name__)
 
 
 class AuthenticationViewSet(GenericViewSet):
@@ -15,14 +21,17 @@ class AuthenticationViewSet(GenericViewSet):
 
     @extend_schema(tags=["Authentication"])
     @action(methods=("POST",), detail=False)
-    def login(self, request, *args, **kwargs):
+    def login(self, request: HttpRequest, *args, **kwargs):
         """Аутентифицирует пользователя."""
         serializer = self.get_serializer(request.data)
 
         user = authenticate(**serializer.data)
 
         if user is None:
-            raise AuthenticationFailed()
+            logger.debug(
+                f"Безуспешная попытка авторизации от {request.META.get('REMOTE_ADDR')}"
+            )
+            raise AuthenticationFailed
 
         login(request, user)
 
