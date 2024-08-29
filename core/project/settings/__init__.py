@@ -1,1 +1,1 @@
-from core.project.settings.local_example import *  # noqa
+from core.project.settings.main import *  # noqa
