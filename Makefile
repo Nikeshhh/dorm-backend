@@ -24,7 +24,7 @@ all-down:
 	${$DC} -f ${APP_FILE} -f ${STORAGES_FILE} -f ${NGINX_FILE} down
 
 .PHONY: app-logs
-all-logs:
+app-logs:
 	${LOGS} ${APP_CONTAINER} -f
 
 .PHONY: nginx-logs
