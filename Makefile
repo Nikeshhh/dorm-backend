@@ -13,11 +13,11 @@ RABBIT_CONTAINER = rabbitmq
 
 .PHONY: all
 all:
-	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} -f ${NGINX_FILE} ${ENV} up --build
+	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} -f ${NGINX_FILE} ${ENV} up --build -d
 
 .PHONY: storages
 storages:
-	${DC} -f ${STORAGES_FILE} ${ENV} up --build
+	${DC} -f ${STORAGES_FILE} ${ENV} up --build -d
 
 .PHONY: all-down
 all-down:
