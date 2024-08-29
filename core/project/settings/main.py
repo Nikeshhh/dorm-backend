@@ -27,7 +27,7 @@ environ.Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = env("DJANGO_SECRET_KEY", default="insecure")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = env("DJANGO_DEBUG", default=False)
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.3.14", "192.168.43.105"]
 

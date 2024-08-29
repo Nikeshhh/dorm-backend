@@ -22,7 +22,7 @@ git clone https://github.com/Nikeshhh/dorm-backend.git
 POSTGRES_DB=defaultdb - название БД
 POSTGRES_USER=postgresql - имя пользователя БД
 POSTGRES_PASSWORD=qwerty - пароль пользователя БД
-POSTGRES_HOST=db - хост БД
+POSTGRES_HOST=postgres_dorm - хост БД
 POSTGRES_PORT=5432 - порт БД (при запуске в локале изменить)
 DJANGO_PORT=8000 - порт приложения
 RABBIT_HOST=rabbitmq - хост Rabbitmq
