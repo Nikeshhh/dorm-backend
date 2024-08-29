@@ -21,7 +21,7 @@ storages:
 
 .PHONY: all-down
 all-down:
-	${$DC} -f ${APP_FILE} -f ${STORAGES_FILE} -f ${NGINX_FILE} down
+	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} -f ${NGINX_FILE} down
 
 .PHONY: app-logs
 app-logs:
